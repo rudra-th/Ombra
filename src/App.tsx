@@ -4,14 +4,24 @@ import { Intention } from './widgets/intention/Intention';
 import { Todos } from './widgets/todos/Todos';
 import { Notes } from './widgets/notes/Notes';
 import { Weather } from './widgets/weather/Weather';
+import { Sound } from './widgets/sound/Sound';
 import { Links } from './widgets/links/Links';
 import { Quote } from './widgets/quotes/Quote';
 import { useSettings } from './state/settings';
 import { useDailyTick } from './state/useDailyTick';
+import { getSoundEngine } from './audio/bridge';
+import { useEffect } from 'react';
 
 export default function App() {
   const settings = useSettings();
   useDailyTick(); // flips every widget's "today" over at local midnight
+
+  // The engine arms once per page; settings drive power and volume after.
+  useEffect(() => {
+    const engine = getSoundEngine();
+    engine.arm();
+    engine.setPower(settings.sound.enabled, settings.sound.volume);
+  }, [settings.sound.enabled, settings.sound.volume]);
 
   return (
     <div className="stage" data-accent={settings.accent}>
@@ -40,6 +50,9 @@ export default function App() {
           </div>
           <div className="arrive a2d">
             <Weather />
+          </div>
+          <div className="arrive a2e">
+            <Sound />
           </div>
         </aside>
         <div className="arrive a4 surface-links">

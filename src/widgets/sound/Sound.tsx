@@ -1,0 +1,127 @@
+import { useSettings, settingsItem } from '../../state/settings';
+import { updateItem } from '../../state/useStorageValue';
+import { ambienceItem, useAmbience } from './item';
+import { BEDS, levelFor, setBed, setLevel, type BedId } from '../../audio/beds';
+import { getSoundPlayer } from '../../audio/bridge';
+import { useEffect } from 'react';
+
+const BED_LABELS: Record<BedId, string> = {
+  rain: 'rain',
+  brown: 'brown',
+  pink: 'pink',
+  fire: 'fire',
+  cafe: 'cafe',
+  ocean: 'ocean',
+  forest: 'forest',
+  wind: 'wind',
+  birds: 'birds',
+};
+
+/** The mixer deck. Power lives in settings; bed and gains live locally. */
+export function Sound() {
+  const settings = useSettings();
+  const ambience = useAmbience();
+
+  // One voice follows one bed: storage is the score, the player obeys.
+  useEffect(() => {
+    const player = getSoundPlayer();
+    if (!settings.sound.enabled || !ambience.bed) {
+      player.stop();
+      return;
+    }
+    player.play(ambience.bed, levelFor(ambience, ambience.bed));
+  }, [settings.sound.enabled, ambience]);
+
+  const togglePower = () => {
+    void updateItem(settingsItem, (prev) => ({
+      ...prev,
+      sound: { ...prev.sound, enabled: !prev.sound.enabled },
+    }));
+  };
+
+  const pickBed = (bed: BedId) => {
+    void updateItem(ambienceItem, (prev) =>
+      setBed(prev, prev.bed === bed ? null : bed),
+    );
+  };
+
+  const onLevel = (bed: BedId, value: number) => {
+    void updateItem(ambienceItem, (prev) => setLevel(prev, bed, value));
+    const player = getSoundPlayer();
+    if (bed === ambience.bed) player.setLevel(value);
+  };
+
+  const volume = (value: number) => {
+    void updateItem(settingsItem, (prev) => ({
+      ...prev,
+      sound: { ...prev.sound, volume: value },
+    }));
+  };
+
+  const activeBed =
+    settings.sound.enabled && ambience.bed ? ambience.bed : null;
+
+  return (
+    <section className="widget" aria-label="Ambience">
+      <p className="widget-label">
+        Ambience
+        <button
+          type="button"
+          className={`sound-switch${settings.sound.enabled ? ' sound-on' : ''}`}
+          role="switch"
+          aria-checked={settings.sound.enabled}
+          aria-label={settings.sound.enabled ? 'Sound on' : 'Sound off'}
+          onClick={togglePower}
+        >
+          <span className="sound-knob" aria-hidden="true" />
+        </button>
+      </p>
+      {settings.sound.enabled ? (
+        <>
+          <div className="sound-beds" role="radiogroup" aria-label="Bed">
+            {BEDS.map((bed) => (
+              <button
+                type="button"
+                key={bed}
+                role="radio"
+                aria-checked={ambience.bed === bed}
+                className={`sound-bed${ambience.bed === bed ? ' sound-bed-active' : ''}`}
+                onClick={() => pickBed(bed)}
+              >
+                {BED_LABELS[bed]}
+              </button>
+            ))}
+          </div>
+          {activeBed && (
+            <label className="sound-level">
+              <span className="sr-only">Level for {BED_LABELS[activeBed]}</span>
+              <input
+                type="range"
+                min={0}
+                max={1}
+                step={0.01}
+                value={levelFor(ambience, activeBed)}
+                onChange={(e) => onLevel(activeBed, Number(e.target.value))}
+              />
+            </label>
+          )}
+          {activeBed && (
+            <label className="sound-level">
+              <span className="sr-only">Master volume</span>
+              <input
+                type="range"
+                min={0}
+                max={1}
+                step={0.05}
+                value={settings.sound.volume}
+                onChange={(e) => volume(Number(e.target.value))}
+              />
+            </label>
+          )}
+        </>
+      ) : (
+        <p className="sound-silent">Silent by design — the switch wakes it.</p>
+      )}
+    </section>
+  );
+}
