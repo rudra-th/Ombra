@@ -10,11 +10,18 @@ export interface SceneSettings {
 
 export type Accent = 'ember' | 'sage' | 'fog';
 
+export interface SoundSettings {
+  /** Master arm — false is the shipped default; the engine never sounds without it. */
+  enabled: boolean;
+  /** Master gain 0..1, default 0.3. */
+  volume: number;
+}
+
 export interface Settings {
   version: 1;
   name: string;
   accent: Accent;
-  soundEnabled: boolean;
+  sound: SoundSettings;
   scene: SceneSettings;
 }
 
@@ -22,7 +29,7 @@ export const DEFAULT_SETTINGS: Settings = {
   version: 1,
   name: '',
   accent: 'ember',
-  soundEnabled: false,
+  sound: { enabled: false, volume: 0.3 },
   scene: {
     kind: 'none',
     id: null,
@@ -63,6 +70,21 @@ function migrateScene(raw: unknown): SceneSettings {
   };
 }
 
+function migrateSound(
+  raw: unknown,
+  legacyFlag: unknown,
+): SoundSettings {
+  // The old flat `soundEnabled: boolean` blob migrates on read: its flag
+  // seeds `sound.enabled`, and a present sound block always wins.
+  if (!asRecord(raw)) {
+    return { enabled: legacyFlag === true, volume: DEFAULT_SETTINGS.sound.volume };
+  }
+  return {
+    enabled: raw.enabled === true,
+    volume: asNumber(raw.volume, 0, 1, DEFAULT_SETTINGS.sound.volume),
+  };
+}
+
 /** Unknown versions fall back to defaults; missing version = v1 partial. */
 export function migrateSettings(raw: unknown): Settings {
   if (!asRecord(raw) || (raw.version !== undefined && raw.version !== 1)) {
@@ -72,7 +94,7 @@ export function migrateSettings(raw: unknown): Settings {
     version: 1,
     name: asText(raw.name, DEFAULT_SETTINGS.name).trim(),
     accent: asChoice(raw.accent, ACCENTS, DEFAULT_SETTINGS.accent),
-    soundEnabled: raw.soundEnabled === true,
+    sound: migrateSound(raw.sound, raw.soundEnabled),
     scene: migrateScene(raw.scene),
   };
 }

@@ -7,7 +7,7 @@ describe('DEFAULT_SETTINGS', () => {
       version: 1,
       name: '',
       accent: 'ember',
-      soundEnabled: false,
+      sound: { enabled: false, volume: 0.3 },
       scene: {
         kind: 'none',
         id: null,
@@ -30,15 +30,32 @@ describe('migrateSettings', () => {
     const merged = migrateSettings({ name: 'Rudra', accent: 'sage' });
     expect(merged.name).toBe('Rudra');
     expect(merged.accent).toBe('sage');
-    expect(merged.soundEnabled).toBe(false);
+    expect(merged.sound.enabled).toBe(false);
     expect(merged.scene).toEqual(DEFAULT_SETTINGS.scene);
+  });
+
+  it('merges a partial sound block over the sound defaults', () => {
+    const merged = migrateSettings({ sound: { volume: 0.5 } });
+    expect(merged.sound.enabled).toBe(false);
+    expect(merged.sound.volume).toBe(0.5);
+  });
+
+  it('understands the legacy soundEnabled boolean', () => {
+    const merged = migrateSettings({ soundEnabled: true });
+    expect(merged.sound.enabled).toBe(true);
+    expect(merged.sound.volume).toBe(0.3);
+  });
+
+  it('prefers the new sound block over the legacy flip', () => {
+    const merged = migrateSettings({ soundEnabled: true, sound: { enabled: false } });
+    expect(merged.sound.enabled).toBe(false);
   });
 
   it('keeps unknown fields out of the result', () => {
     const merged = migrateSettings({ name: 'R', hacker: true });
     expect(merged).not.toHaveProperty('hacker');
     expect(Object.keys(merged).sort()).toEqual(
-      ['accent', 'name', 'scene', 'soundEnabled', 'version'].sort(),
+      ['accent', 'name', 'scene', 'sound', 'version'].sort(),
     );
   });
 
@@ -59,5 +76,17 @@ describe('migrateSettings', () => {
   it('rejects a scene kind it does not know', () => {
     const merged = migrateSettings({ scene: { kind: 'ligo' } });
     expect(merged.scene.kind).toBe('none');
+  });
+
+  it('clamps loud volume junk to deaf-safe bounds', () => {
+    expect(migrateSettings({ sound: { volume: 7 } }).sound.volume).toBe(1);
+    expect(migrateSettings({ sound: { volume: -2 } }).sound.volume).toBe(0);
+    expect(migrateSettings({ sound: { volume: 'loud' } }).sound.volume).toBe(0.3);
+  });
+
+  it('treats a non-boolean enabled flag as silent', () => {
+    expect(migrateSettings({ sound: { enabled: 'yes' } }).sound.enabled).toBe(
+      false,
+    );
   });
 });
