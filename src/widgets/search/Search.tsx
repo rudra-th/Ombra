@@ -16,9 +16,12 @@ export function Search() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const typing = isTypingTarget(e.target);
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
-        e.preventDefault();
-        ref.current?.focus();
+      if (((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k')) {
+        // only when the user is not mid-sentence elsewhere
+        if (!typing) {
+          e.preventDefault();
+          ref.current?.focus();
+        }
       } else if (e.key === '/' && !typing) {
         e.preventDefault();
         ref.current?.focus();
