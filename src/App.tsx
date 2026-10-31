@@ -2,6 +2,8 @@ import { Clock } from './widgets/time/Clock';
 import { Search } from './widgets/search/Search';
 import { Intention } from './widgets/intention/Intention';
 import { Todos } from './widgets/todos/Todos';
+import { Notes } from './widgets/notes/Notes';
+import { Weather } from './widgets/weather/Weather';
 import { Links } from './widgets/links/Links';
 import { Quote } from './widgets/quotes/Quote';
 import { useSettings } from './state/settings';
@@ -30,6 +32,12 @@ export default function App() {
           </div>
           <div className="arrive a2">
             <Todos />
+          </div>
+          <div className="arrive a2">
+            <Notes />
+          </div>
+          <div className="arrive a2">
+            <Weather />
           </div>
         </aside>
         <div className="arrive a4 surface-links">

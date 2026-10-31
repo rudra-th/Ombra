@@ -117,7 +117,7 @@ week. mv3: alarms ≥ 0.5min (Chrome 120), ≤ 500 total.
 
 0. **Foundation** ✅ scaffold · tokens · grain · fonts · settings schema ·
    dark shell boots (<200ms).
-1. **Daily surface** — widgets above (except sound/stats/presets), editorial
+1. **Daily surface** ✅ widgets above (except sound/stats/presets), editorial
    layout, quality pass (inspect + design review loop).
 2. **Sound & ambience** — engine, first-gesture wake, mixer deck, breathing,
    focus timer.
