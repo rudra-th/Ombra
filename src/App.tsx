@@ -5,6 +5,8 @@ import { Todos } from './widgets/todos/Todos';
 import { Notes } from './widgets/notes/Notes';
 import { Weather } from './widgets/weather/Weather';
 import { Sound } from './widgets/sound/Sound';
+import { Breath } from './widgets/breath/Breath';
+import { Focus } from './widgets/focus/Focus';
 import { Links } from './widgets/links/Links';
 import { Quote } from './widgets/quotes/Quote';
 import { useSettings } from './state/settings';
@@ -53,6 +55,12 @@ export default function App() {
           </div>
           <div className="arrive a2e">
             <Sound />
+          </div>
+          <div className="arrive a2f">
+            <Breath />
+          </div>
+          <div className="arrive a2g">
+            <Focus />
           </div>
         </aside>
         <div className="arrive a4 surface-links">

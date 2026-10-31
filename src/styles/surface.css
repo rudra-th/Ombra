@@ -52,8 +52,10 @@
 .a2c { animation-delay: 320ms; }
 .a2d { animation-delay: 390ms; }
 .a2e { animation-delay: 460ms; }
-.a3  { animation-delay: 540ms; }
-.a4  { animation-delay: 640ms; }
+.a2f { animation-delay: 530ms; }
+.a2g { animation-delay: 600ms; }
+.a3  { animation-delay: 680ms; }
+.a4  { animation-delay: 770ms; }
 
 /* ————— Hero ————— */
 
@@ -632,6 +634,92 @@
   margin-top: 10px;
 }
 
+/* ————— Breath ritual ————— */
+
+.breath-patterns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 10px;
+}
+
+.breath-stage {
+  position: relative;
+  height: 96px;
+  margin-top: 14px;
+  display: grid;
+  place-items: center;
+}
+
+.breath-halo {
+  position: absolute;
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  border: 1px solid var(--hairline);
+}
+
+.breath-ring {
+  position: absolute;
+  width: 74px;
+  height: 74px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    var(--pulse-soft) 0%,
+    transparent 72%
+  );
+  transform: scale(0.55);
+}
+
+.breath-ring.breath-in {
+  animation: breath-grow linear both;
+}
+
+.breath-ring.breath-out {
+  animation: breath-shrink linear both;
+}
+
+.breath-ring.breath-hold {
+  transform: scale(1);
+}
+
+.breath-ring.breath-hold2 {
+  transform: scale(0.55);
+}
+
+@keyframes breath-grow {
+  from { transform: scale(0.55); }
+  to   { transform: scale(1); }
+}
+
+@keyframes breath-shrink {
+  from { transform: scale(1); }
+  to   { transform: scale(0.55); }
+}
+
+.breath-copy {
+  position: absolute;
+  bottom: -4px;
+  font-size: 12.5px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.breath-toggle {
+  margin-top: 10px;
+}
+
+/* ————— Focus timer ————— */
+
+.focus-clock {
+  font-family: var(--font-display);
+  font-size: 30px;
+  color: var(--ink);
+  margin-top: 8px;
+  letter-spacing: 0.01em;
+}
+
 /* ————— Grace for small windows ————— */
 
 @media (max-width: 860px) {
@@ -671,8 +759,19 @@
   .widget-trigger,
   .todo-ring,
   .todo-text,
-  .notes-box {
+  .notes-box,
+  .sound-knob,
+  .sound-bed {
     transition: none;
+  }
+
+  .breath-ring.breath-in,
+  .breath-ring.breath-out {
+    animation: none;
+  }
+
+  .breath-ring {
+    transform: scale(0.78);
   }
 }
 
