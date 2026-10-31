@@ -10,7 +10,7 @@ const link = (label: string, url: string): LinkItem => ({
 describe('addLink', () => {
   it('normalizes bare urls to https', () => {
     const res = addLink([], 'GitHub', 'github.com');
-    expect(res[0].url).toBe('https://github.com');
+    expect(res[0]?.url).toBe('https://github.com');
   });
 
   it('refuses duplicates of the same url', () => {

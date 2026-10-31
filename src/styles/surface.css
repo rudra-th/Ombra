@@ -1,0 +1,462 @@
+/* Ombra — the daily surface. Editorial grid, hairlines, one accent. */
+
+.surface {
+  height: 100vh;
+  padding: clamp(32px, 5vw, 72px) clamp(32px, 6vw, 96px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(280px, 30vw, 380px);
+  grid-template-rows: auto 1fr auto;
+  grid-template-areas:
+    'main side'
+    'main side'
+    'links links';
+  column-gap: clamp(40px, 6vw, 120px);
+  align-items: stretch;
+}
+
+.col-main {
+  grid-area: main;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  align-content: start;
+  justify-items: start;
+  min-height: 0;
+}
+
+.col-side {
+  grid-area: side;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  min-height: 0;
+  padding-top: 6px;
+  border-left: 1px solid var(--hairline);
+  padding-left: clamp(24px, 3vw, 48px);
+}
+
+.surface-links {
+  grid-area: links;
+}
+
+/* ————— Arrivals: each block lands 70–110 ms after the last ————— */
+
+.arrive {
+  animation: arrive 700ms var(--ease-out) both;
+}
+
+.a0 { animation-delay: 0ms; }
+.a1 { animation-delay: 90ms; }
+.a2 { animation-delay: 180ms; }
+.a3 { animation-delay: 300ms; }
+.a4 { animation-delay: 380ms; }
+
+/* ————— Hero ————— */
+
+.hero {
+  display: grid;
+  gap: 14px;
+  justify-items: start;
+  text-align: left;
+  padding-block: 8px 0;
+}
+
+.hero-greeting {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(26px, 2.8vw, 40px);
+  letter-spacing: -0.015em;
+  line-height: 1.1;
+  color: var(--ink-2);
+}
+
+.hero-clock {
+  font-size: clamp(64px, 10.5vw, 156px);
+  font-weight: 480;
+  letter-spacing: -0.035em;
+  line-height: 0.95;
+  color: var(--ink);
+}
+
+.hero-date {
+  color: var(--muted);
+  font-size: 14px;
+  letter-spacing: 0.02em;
+}
+
+/* ————— Search ————— */
+
+.main-search {
+  align-self: center;
+  justify-self: stretch;
+  max-width: 560px;
+  width: 100%;
+}
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-bottom: 1px solid var(--hairline);
+  padding: 10px 2px;
+  transition: border-color var(--dur) var(--ease-out);
+}
+
+.search:focus-within {
+  border-color: var(--hairline-strong);
+}
+
+.search-glyph {
+  color: var(--muted);
+  flex: none;
+}
+
+.search-input {
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: 18px;
+  caret-color: var(--pulse);
+}
+
+.search-input::placeholder {
+  color: var(--muted);
+  opacity: 0.7;
+}
+
+.search-hint {
+  flex: none;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  color: var(--muted);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  padding: 1px 7px;
+  opacity: 0;
+  transition: opacity var(--dur) var(--ease-out);
+}
+
+.search:focus-within .search-hint {
+  opacity: 0.8;
+}
+
+/* ————— Quote ————— */
+
+.main-quote {
+  max-width: 52ch;
+}
+
+.quote {
+  display: grid;
+  gap: 10px;
+}
+
+.quote-text {
+  font-family: var(--font-display);
+  font-weight: 350;
+  font-size: clamp(15px, 1.25vw, 17px);
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.quote-author {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  opacity: 0.75;
+}
+
+/* ————— Widgets (right column) ————— */
+
+.widget {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+.widget-label {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.widget-input,
+.search input,
+.links-input {
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--ink);
+  font-family: var(--font-ui);
+  caret-color: var(--pulse);
+}
+
+.widget-input {
+  width: 100%;
+  font-size: 15px;
+  padding: 0;
+}
+
+.widget-input::placeholder {
+  color: var(--muted);
+  opacity: 0.6;
+}
+
+.intention-input {
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.intention-streak {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.stone {
+  color: var(--pulse);
+  font-size: 9px;
+}
+
+/* ————— Todos ————— */
+
+.todo-list {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.todo-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  border-radius: var(--radius);
+}
+
+.todo-ring {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--hairline-strong);
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+  display: inline-grid;
+  place-items: center;
+  align-self: center;
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+
+.todo-ring:hover {
+  border-color: var(--pulse);
+}
+
+.todo-ring-ghost {
+  border-style: dashed;
+  color: var(--muted);
+  cursor: default;
+  font-size: 11px;
+  line-height: 1;
+}
+
+.todo-ring-ghost:hover {
+  border-color: var(--hairline-strong);
+}
+
+.todo-tick {
+  color: var(--pulse);
+  font-size: 8px;
+  line-height: 1;
+}
+
+.todo-text {
+  padding-block: 5px;
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+
+.todo-text:hover {
+  border-color: var(--hairline);
+}
+
+.todo-text:focus {
+  border-color: var(--hairline-strong);
+}
+
+.todo-done .todo-text {
+  color: var(--muted);
+  text-decoration: line-through;
+  text-decoration-color: var(--hairline-strong);
+  text-decoration-thickness: 1px;
+}
+
+.todo-done .todo-ring {
+  border-color: var(--pulse);
+  opacity: 0.85;
+}
+
+.todo-add {
+  align-self: stretch;
+}
+
+.todo-carried {
+  font-size: 12px;
+  color: var(--muted);
+  opacity: 0.65;
+}
+
+/* Shared quiet remove — appears only on hover of its row */
+.row-remove {
+  flex: none;
+  align-self: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 10px;
+  opacity: 0;
+  padding: 2px 4px;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+
+.todo-row:hover .row-remove,
+.link-item:hover .row-remove,
+.row-remove:focus-visible {
+  opacity: 0.7;
+}
+
+.row-remove:hover {
+  opacity: 1 !important;
+  color: var(--ink);
+}
+
+/* ————— Links row ————— */
+
+.links-row {
+  list-style: none;
+  padding: 14px 0 0;
+  margin: 0;
+  border-top: 1px solid var(--hairline);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 20px;
+  min-height: 48px;
+}
+
+.link-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.link-item > a {
+  font-size: 13px;
+  letter-spacing: 0.01em;
+  color: var(--ink-2);
+  padding-block: 6px;
+  position: relative;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.link-item > a::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 100%;
+  bottom: 2px;
+  height: 1px;
+  background: var(--pulse);
+  transition: right var(--dur) var(--ease-out);
+}
+
+.link-item > a:hover {
+  color: var(--ink);
+}
+
+.link-item > a:hover::after {
+  right: 0;
+}
+
+.links-plus {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--muted);
+  padding-block: 6px;
+  letter-spacing: 0.04em;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.links-plus:hover {
+  color: var(--ink);
+}
+
+.links-form {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.links-input {
+  font-size: 13px;
+  border-bottom: 1px solid var(--hairline);
+  padding-block: 2px;
+  width: 9em;
+}
+
+.links-input:last-child {
+  width: 16em;
+}
+
+.links-input:focus {
+  border-color: var(--hairline-strong);
+}
+
+/* ————— Grace for small windows ————— */
+
+@media (max-width: 860px), (max-height: 560px) {
+  body {
+    overflow: auto;
+  }
+
+  .surface {
+    height: auto;
+    min-height: 100vh;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      'main'
+      'side'
+      'links';
+    row-gap: 40px;
+  }
+
+  .col-side {
+    border-left: none;
+    padding-left: 0;
+    border-top: 1px solid var(--hairline);
+    padding-top: 32px;
+  }
+
+  .main-search {
+    padding-block: 40px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arrive {
+    animation: none;
+  }
+
+  .link-item > a::after {
+    transition: none;
+  }
+}

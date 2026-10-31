@@ -41,7 +41,7 @@ export const ENGINE_LIST: SearchEngine[] = [
 ];
 
 const defaultEngine = (): SearchEngine =>
-  ENGINE_LIST.find((e) => e.isDefault) ?? ENGINE_LIST[0];
+  ENGINE_LIST.find((e) => e.isDefault) ?? ENGINE_LIST[0]!;
 
 /** RFC 3986: encodes the five marks `encodeURIComponent` leaves behind. */
 const strictEncode = (query: string) =>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 
-export function useClock(intervalMs = 1_000): Date {
+/** The clock prints HH:MM — a half-minute heartbeat is plenty. */
+export function useClock(intervalMs = 30_000): Date {
   const [now, setNow] = useState(() => new Date());
 
   useEffect(() => {

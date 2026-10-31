@@ -212,5 +212,7 @@ export function pickQuote(dayKey: string): Quote {
         Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])) / 86_400_000,
       )
     : [...dayKey].reduce((h, c) => h * 31 + c.charCodeAt(0), 0);
-  return QUOTES[((day % QUOTES.length) + QUOTES.length) % QUOTES.length];
+  return (
+    QUOTES[((day % QUOTES.length) + QUOTES.length) % QUOTES.length] ?? QUOTES[0]!
+  );
 }
