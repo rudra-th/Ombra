@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { todayKey, nextStreak, type StreakState } from './store';
+import { todayKey } from '../../state/day';
+import { nextStreak, type StreakState } from './store';
 
 const KEY = (y: number, m: number, d: number) =>
   `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`;

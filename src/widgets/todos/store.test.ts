@@ -52,4 +52,21 @@ describe('decayTodos', () => {
     expect(res.active).toEqual([]);
     expect(res.carriedCount).toBe(0);
   });
+
+  it('dissolves unfinished items beyond the carry window', () => {
+    const today = '2026-10-31';
+    const fresh = item('a', 'recent', '2026-10-30');
+    const fossil = item('b', 'long gone', '2026-10-20');
+
+    const res = decayTodos([fresh, fossil], today);
+    expect(res.active).toEqual([]);
+    expect(res.carriedCount).toBe(1);
+  });
+
+  it('respects a custom carry window', () => {
+    const today = '2026-10-31';
+    const old = item('a', 'old', '2026-10-25');
+    expect(decayTodos([old], today, 10).carriedCount).toBe(1);
+    expect(decayTodos([old], today, 1).carriedCount).toBe(0);
+  });
 });

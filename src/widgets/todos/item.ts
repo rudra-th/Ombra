@@ -1,5 +1,6 @@
 import { storage } from 'wxt/utils/storage';
-import { decayTodos, type TodoItem } from './store';
+import { pruneTodos, type TodoItem } from './store';
+import { todayKey } from '../../state/day';
 
 export const todosItem = storage.defineItem<TodoItem[]>('local:todos', {
   fallback: [],
@@ -8,7 +9,7 @@ export const todosItem = storage.defineItem<TodoItem[]>('local:todos', {
 const makeId = (today: string): string =>
   `${today}-${Date.now().toString(36)}`;
 
-/** Adding prunes only dissolved items (finished before today); carried stay counted. */
+/** Adding prunes dissolved decay first, so storage never bloats. */
 export function addTodo(
   list: TodoItem[],
   text: string,
@@ -16,14 +17,8 @@ export function addTodo(
 ): TodoItem[] {
   const trimmed = text.trim();
   if (!trimmed) return list;
-  const kept = list.filter(
-    (it) =>
-      it.created === today ||
-      (it.done && it.doneAt === today) ||
-      !it.done,
-  );
   return [
-    ...kept,
+    ...pruneTodos(list, today),
     {
       id: makeId(today),
       text: trimmed,

@@ -1,5 +1,5 @@
 import { pickQuote } from './feed';
-import { todayKey } from '../intention/store';
+import { todayKey } from '../../state/day';
 
 /** One line a day. Same all day, in every tab, offline forever. */
 export function Quote() {

@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { intentionItem, commitIntention, type IntentionRecord } from './item';
-import { todayKey } from './store';
-import { useStorageValue } from '../../state/useStorageValue';
+import { todayKey } from '../../state/day';
+import { useStorageValue, updateItem } from '../../state/useStorageValue';
 
 /** The day's one thing — written in one line, kept by a quiet stone. */
 export function Intention() {
@@ -10,6 +10,7 @@ export function Intention() {
   const isToday = record.key === today;
   const [draft, setDraft] = useState('');
   const [editing, setEditing] = useState(false);
+  const touched = useRef(false);
   const source = isToday ? record.text : '';
 
   // Follow the record while idle; never echo over fresh keystrokes mid-edit.
@@ -19,8 +20,12 @@ export function Intention() {
 
   const commit = () => {
     setEditing(false);
+    if (!touched.current) return;
+    touched.current = false;
     if (draft !== record.text) {
-      void intentionItem.setValue(commitIntention(record, draft, today));
+      void updateItem(intentionItem, (prev) =>
+        commitIntention(prev, draft, todayKey(new Date())),
+      );
     }
   };
 
@@ -36,7 +41,10 @@ export function Intention() {
         aria-label="Intention for today"
         value={draft}
         onFocus={() => setEditing(true)}
-        onChange={(e) => setDraft(e.target.value)}
+        onChange={(e) => {
+          touched.current = true;
+          setDraft(e.target.value);
+        }}
         onBlur={commit}
         onKeyDown={(e) => {
           if (e.key === 'Enter') {

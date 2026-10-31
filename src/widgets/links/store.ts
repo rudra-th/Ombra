@@ -9,7 +9,9 @@ export const LINK_CAP = 9;
 
 const normalizeUrl = (url: string): string => {
   const s = url.trim();
-  return /^https?:\/\//i.test(s) ? s : `https://${s}`;
+  const withScheme = /^https?:\/\//i.test(s) ? s : `https://${s}`;
+  // trailing slash is a spelling difference, not a different place
+  return withScheme.replace(/(?:\/)(\?.*)?$/, '$1');
 };
 
 /** Silent no-ops: duplicates unchanged, ninth-plus links politely refused. */

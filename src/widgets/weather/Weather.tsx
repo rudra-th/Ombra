@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   weatherItem,
   weatherCacheItem,
@@ -7,7 +7,7 @@ import {
   type WeatherCache,
 } from './item';
 import { wmoLabel, buildGeocodeUrl, buildForecastUrl } from './codes';
-import { useStorageValue } from '../../state/useStorageValue';
+import { useStorageValue, updateItem } from '../../state/useStorageValue';
 
 interface GeocodeReply {
   results?: Array<{
@@ -35,26 +35,39 @@ export function Weather() {
   const [failed, setFailed] = useState(false);
   const busy = useRef(false);
 
-  useEffect(() => {
-    if (!config) return;
-    if (cache && Date.now() - cache.ts < WEATHER_TTL_MS) return;
+  const refresh = useCallback((cfg: WeatherConfig) => {
     if (busy.current) return;
     busy.current = true;
     void (async () => {
       try {
-        const res = await fetch(buildForecastUrl(config.latitude, config.longitude));
+        const res = await fetch(buildForecastUrl(cfg.latitude, cfg.longitude));
         const data = (await res.json()) as ForecastReply;
         const { temperature_2m: temp, weather_code: code } = data.current ?? {};
         if (typeof temp === 'number' && typeof code === 'number') {
           void weatherCacheItem.setValue({ temp, code, ts: Date.now() });
         }
       } catch {
-        /* offline stays quiet */
+        /* offline stays quiet — the next wake tries again */
       } finally {
         busy.current = false;
       }
     })();
-  }, [config?.latitude, config?.longitude, config, cache?.ts, cache]);
+  }, []);
+
+  // Fetch when stale, and also whenever the page wakes up — an offline
+  // launch shouldn't leave the widget blank forever.
+  useEffect(() => {
+    const maybe = () => {
+      const expired = !cache || Date.now() - cache.ts >= WEATHER_TTL_MS;
+      if (config && expired) refresh(config);
+    };
+    maybe();
+    const onWake = () => {
+      if (document.visibilityState === 'visible') maybe();
+    };
+    document.addEventListener('visibilitychange', onWake);
+    return () => document.removeEventListener('visibilitychange', onWake);
+  }, [config, cache?.ts, cache, refresh]);
 
   const add = async () => {
     const name = city.trim();
@@ -85,11 +98,20 @@ export function Weather() {
     <section className="widget" aria-label="Weather">
       <p className="widget-label">Weather</p>
       {config && cache && (
-        <p className="weather-line">
-          <span className="weather-temp tnum">{Math.round(cache.temp)}°</span>{' '}
-          <span className="weather-cond">{wmoLabel(cache.code)}</span>
-          <span className="weather-city">{config.city}</span>
-        </p>
+        <>
+          <p className="weather-line">
+            <span className="weather-temp tnum">{Math.round(cache.temp)}°</span>{' '}
+            <span className="weather-cond">{wmoLabel(cache.code)}</span>
+            <span className="weather-city">{config.city}</span>
+          </p>
+          <button
+            type="button"
+            className="widget-trigger"
+            onClick={() => void updateItem(weatherItem, () => null)}
+          >
+            change city
+          </button>
+        </>
       )}
       {config === null && !editing && (
         <button
@@ -119,8 +141,11 @@ export function Weather() {
             onChange={(e) => setCity(e.target.value)}
             onKeyDown={(e) => {
               if (e.key === 'Escape') {
-                setEditing(false);
-                setFailed(false);
+                if (config) setEditing(false);
+                else {
+                  setEditing(false);
+                  setFailed(false);
+                }
               }
             }}
           />

@@ -3,12 +3,22 @@ import type { FormEvent } from 'react';
 import { browser } from 'wxt/browser';
 import { linksItem } from './item';
 import { addLink, removeLink, type LinkItem } from './store';
-import { useStorageValue } from '../../state/useStorageValue';
+import { useStorageValue, updateItem } from '../../state/useStorageValue';
 
 interface Top_site {
   title: string;
   url: string;
 }
+
+type PickerState = { kind: 'closed' } | { kind: 'open'; sites: Top_site[]; note?: string };
+
+const safeUrl = (raw: string): URL | null => {
+  try {
+    return new URL(raw);
+  } catch {
+    return null;
+  }
+};
 
 /** One quiet row, nine wide at most, opt-in and hand-built. */
 export function Links() {
@@ -16,11 +26,11 @@ export function Links() {
   const [open, setOpen] = useState(false);
   const [label, setLabel] = useState('');
   const [url, setUrl] = useState('');
-  const [picker, setPicker] = useState<Top_site[] | null>(null);
+  const [picker, setPicker] = useState<PickerState>({ kind: 'closed' });
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
-    void linksItem.setValue(addLink(links, label, url));
+    void updateItem(linksItem, (prev) => addLink(prev, label, url));
     setLabel('');
     setUrl('');
     setOpen(false);
@@ -32,38 +42,41 @@ export function Links() {
         (await browser.permissions.contains({ permissions: ['topSites'] })) ||
         (await browser.permissions.request({ permissions: ['topSites'] }));
       if (!granted) return;
-      const top = await browser.topSites.get();
-      setPicker(top.slice(0, 12) as Top_site[]);
+      const top = (await browser.topSites.get()) as Top_site[];
+      const sites = top.slice(0, 12);
+      setPicker(links.length >= 9
+        ? { kind: 'open', sites, note: 'The row is full — remove one first.' }
+        : { kind: 'open', sites });
     } catch {
-      setPicker(null);
+      setPicker({ kind: 'open', sites: [], note: 'Top sites unavailable here.' });
     }
   };
 
   useEffect(() => {
-    if (!picker) return;
+    if (picker.kind !== 'open') return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setPicker(null);
+      if (e.key === 'Escape') setPicker({ kind: 'closed' });
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [picker]);
 
   const pick = (site: Top_site) => {
-    void linksItem.setValue(
-      addLink(links, site.title || new URL(site.url).hostname, site.url),
-    );
-    setPicker(null);
+    const host = safeUrl(site.url)?.hostname ?? site.url;
+    void updateItem(linksItem, (prev) => addLink(prev, site.title || host, site.url));
+    setPicker({ kind: 'closed' });
   };
 
-  const candidates = picker?.filter(
-    (s) => !links.some((l) => l.url === s.url),
-  );
-
-  return (
-    <nav className="links" aria-label="Quick links">
-      {candidates && candidates.length > 0 && (
-        <div className="links-picker" role="dialog" aria-label="Top sites">
-          <p className="widget-label">Top sites — add quietly</p>
+  if (picker.kind === 'open') {
+    const candidates = picker.sites.filter(
+      (s) => !links.some((l) => l.url === s.url),
+    );
+    return (
+      <div className="links-picker" role="dialog" aria-label="Top sites">
+        <p className="widget-label">Top sites — add quietly</p>
+        {candidates.length === 0 ? (
+          <p className="links-note">{picker.note ?? 'Nothing more to add.'}</p>
+        ) : (
           <ul>
             {candidates.map((s) => (
               <li key={s.url}>
@@ -78,15 +91,20 @@ export function Links() {
               </li>
             ))}
           </ul>
-          <button
-            type="button"
-            className="widget-trigger"
-            onClick={() => setPicker(null)}
-          >
-            ✕ close
-          </button>
-        </div>
-      )}
+        )}
+        <button
+          type="button"
+          className="widget-trigger"
+          onClick={() => setPicker({ kind: 'closed' })}
+        >
+          ✕ close
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <nav className="links" aria-label="Quick links">
       <ul className="links-row">
         {links.map((l) => (
           <li key={l.id} className="link-item">
@@ -97,7 +115,9 @@ export function Links() {
               type="button"
               className="row-remove"
               aria-label={`Remove ${l.label}`}
-              onClick={() => void linksItem.setValue(removeLink(links, l.url))}
+              onClick={() =>
+                void updateItem(linksItem, (prev) => removeLink(prev, l.url))
+              }
             >
               ✕
             </button>

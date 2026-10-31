@@ -4,18 +4,7 @@ export interface StreakState {
   lastKey: string | null;
 }
 
-export { todayKey } from '../../state/day';
-
-const DAY_MS = 86_400_000;
-
-/** Whole days from key `a` to key `b`. Fixed noon UTC keeps DST out of the math. */
-function keyDiff(a: string, b: string): number {
-  const parse = (key: string): number => {
-    const [y = 0, m = 1, d = 1] = key.split('-').map(Number);
-    return Date.UTC(y, m - 1, d, 12);
-  };
-  return Math.round((parse(b) - parse(a)) / DAY_MS);
-}
+import { daysBetween } from '../../state/day';
 
 /**
  * The streak the next intention should leave behind.
@@ -33,5 +22,5 @@ export function nextStreak(
   if (prev.lastKey === null) {
     return 1; // the very first intention
   }
-  return keyDiff(prev.lastKey, setFor) === 1 ? prev.streak + 1 : 1;
+  return daysBetween(prev.lastKey, setFor) === 1 ? prev.streak + 1 : 1;
 }

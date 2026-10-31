@@ -1,19 +1,24 @@
 import { useState } from 'react';
 import { todosItem, addTodo, toggleTodo, removeTodo } from './item';
 import { decayTodos, type TodoItem } from './store';
-import { todayKey } from '../intention/store';
-import { useStorageValue } from '../../state/useStorageValue';
+import { todayKey } from '../../state/day';
+import { useStorageValue, updateItem } from '../../state/useStorageValue';
 
-/** Decay by design: ≤ a handful of rows, yesterday folds into one count. */
+/** The plan's promise: five visible rows, then one honest count. */
+const VISIBLE_CAP = 5;
+
+/** Decay by design: a handful of rows, yesterday folds into one count. */
 export function Todos() {
   const todos = useStorageValue(todosItem) as TodoItem[];
   const today = todayKey(new Date());
   const { active, carriedCount } = decayTodos(todos, today);
+  const visible = active.slice(0, VISIBLE_CAP);
+  const overflow = active.length - visible.length;
   const [draft, setDraft] = useState('');
 
   const add = () => {
     if (!draft.trim()) return;
-    void todosItem.setValue(addTodo(todos, draft, today));
+    void updateItem(todosItem, (prev) => addTodo(prev, draft, todayKey(new Date())));
     setDraft('');
   };
 
@@ -21,14 +26,18 @@ export function Todos() {
     <section className="widget" aria-label="Todos">
       <p className="widget-label">Todos</p>
       <ul className="todo-list">
-        {active.map((t) => (
+        {visible.map((t) => (
           <li key={t.id} className={`todo-row${t.done ? ' todo-done' : ''}`}>
             <button
               type="button"
               className="todo-ring"
               aria-label={t.done ? 'Mark not done' : 'Mark done'}
               aria-pressed={t.done}
-              onClick={() => void todosItem.setValue(toggleTodo(todos, t.id, today))}
+              onClick={() =>
+                void updateItem(todosItem, (prev) =>
+                  toggleTodo(prev, t.id, todayKey(new Date())),
+                )
+              }
             >
               {t.done && <span className="todo-tick" aria-hidden="true">✕</span>}
             </button>
@@ -39,8 +48,8 @@ export function Todos() {
               value={t.text}
               onChange={(e) => {
                 const text = e.target.value;
-                void todosItem.setValue(
-                  todos.map((x) => (x.id === t.id ? { ...x, text } : x)),
+                void updateItem(todosItem, (prev) =>
+                  prev.map((x) => (x.id === t.id ? { ...x, text } : x)),
                 );
               }}
               onKeyDown={(e) => {
@@ -51,7 +60,7 @@ export function Todos() {
               type="button"
               className="row-remove"
               aria-label="Remove todo"
-              onClick={() => void todosItem.setValue(removeTodo(todos, t.id))}
+              onClick={() => void updateItem(todosItem, (prev) => removeTodo(prev, t.id))}
             >
               ✕
             </button>
@@ -73,8 +82,11 @@ export function Todos() {
           />
         </li>
       </ul>
+      {overflow > 0 && (
+        <p className="todo-carried tnum">+{overflow} waiting</p>
+      )}
       {carriedCount > 0 && (
-        <p className="todo-carried tnum" aria-label={`${carriedCount} carried over from earlier`}>
+        <p className="todo-carried tnum" aria-label={`${carriedCount} carried over from earlier days`}>
           carried over ({carriedCount})
         </p>
       )}
