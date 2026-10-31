@@ -1,0 +1,9 @@
+node_modules/
+.output/
+dist/
+.wxt/
+.taste-skill/
+*.zip
+*.local
+.DS_Store
+Thumbs.db
