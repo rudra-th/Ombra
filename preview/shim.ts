@@ -34,18 +34,32 @@ const makeArea = (name: string) => {
       const store = bag();
       const changes: Record<string, Change> = {};
       for (const [k, v] of Object.entries(values)) {
+        // Real chrome.storage omits unchanged keys from change events.
+        if (store[k] === v) continue;
         changes[k] = { oldValue: store[k], newValue: store[k] = v };
       }
       for (const l of listeners) l(changes, name);
     },
     remove: async (keys: string | string[]) => {
       const store = bag();
-      for (const k of Array.isArray(keys) ? keys : [keys]) {
-        delete store[k];
+      const list = Array.isArray(keys) ? keys : [keys];
+      const changes: Record<string, Change> = {};
+      for (const k of list) {
+        if (k in store) {
+          changes[k] = { oldValue: store[k], newValue: undefined };
+          delete store[k];
+        }
       }
+      if (Object.keys(changes).length) for (const l of listeners) l(changes, name);
     },
     clear: async () => {
+      const store = bag();
+      const changes: Record<string, Change> = {};
+      for (const k of Object.keys(store)) {
+        changes[k] = { oldValue: store[k], newValue: undefined };
+      }
       data[name] = {};
+      if (Object.keys(changes).length) for (const l of listeners) l(changes, name);
     },
     onChanged: {
       addListener: (l: Listener) => void listeners.add(l),

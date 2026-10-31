@@ -24,12 +24,13 @@ Load the production build manually: `chrome://extensions` → Developer mode →
 
 ## The preview harness
 
-`.output/chrome-mv3/preview.html` renders the dashboard outside the new-tab
-slot — a dev-only page plus `src/entrypoints/preview/shim.ts`, which fakes
-`chrome.storage` and static APIs into whatever `chrome` stub the embedder has
-(never replacing a real extension context). It pre-fills demo data when it
-detects a non-extension environment, so real user data is never touched. Use it
-for design passes and screenshots; the real extension page stays
+`npm run build:preview` builds the dashboard to gitignored `.preview/` — a
+standalone Vite build completely outside the WXT pipeline, so the harness
+(`preview/shim.ts`, which fakes `chrome.storage` and static APIs into whatever
+`chrome` stub the embedder has) never ships in the extension. The shim merges
+into an existing `chrome` stub rather than replacing a real extension context,
+and pre-fills demo data only when it detects a non-extension environment. Serve
+it with `npm run serve:preview`. The real extension page stays
 `chrome-extension://…/newtab.html`.
 
 ## Stack

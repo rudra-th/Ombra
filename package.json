@@ -13,7 +13,8 @@
     "zip": "wxt zip",
     "compile": "wxt prepare && tsc --noEmit",
     "test": "vitest run",
-    "serve:preview": "node scripts/serve.cjs .output/chrome-mv3 4173",
+    "build:preview": "vite build --config vite.preview.config.ts",
+    "serve:preview": "node scripts/serve.cjs .preview 4173",
     "postinstall": "wxt prepare"
   },
   "dependencies": {

@@ -3,6 +3,7 @@ node_modules/
 dist/
 .wxt/
 .taste-skill/
+.preview/
 *.zip
 *.local
 .DS_Store
