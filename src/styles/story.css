@@ -1,0 +1,502 @@
+/**
+ * The film: a summoned, pinned-scroll reel over the daily surface.
+ * Three beats on native anonymous scroll() timelines; the JS controller
+ * only leans on it — chrome vars, the 24fps stamp, dust, scenes.
+ * Cinematic rules live here: compositor-only tweens, blur as transition
+ * only, static when the OS (or you) asks for stills.
+ */
+
+.film {
+  /* the film is the lens: it paints nothing itself in cinema — the screen
+     does; in stills it holds the canvas (see data-static far below) */
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: transparent;
+}
+
+.film-scroll {
+  --track-height: calc(var(--track-vh, 350) * 1dvh);
+  height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  outline: none;
+}
+
+.film-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.film-scroll:focus-visible {
+  outline: none;
+}
+
+/* ————— the screen beneath everything ————— */
+
+.film-screen {
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+  /* zero flow cost — the reel owns the whole scroll range */
+  margin-bottom: calc(-1 * 100dvh);
+  background: var(--canvas);
+  /* the resolve: the reel thins and the day is already waiting */
+  animation: reel-resolve linear both;
+  animation-timeline: scroll(nearest block);
+}
+
+.film-dust {
+  position: absolute;
+  inset: 0;
+}
+
+.film-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 15vh;
+  background: var(--canvas);
+  /* chrome writes the strength; the bars are pure transform,
+     and the resolve retracts them so the day lands unframed */
+  animation: reel-bars linear both;
+  animation-timeline: scroll(nearest block);
+}
+
+.film-bar--top {
+  top: 0;
+  transform-origin: top;
+}
+
+.film-bar--bottom {
+  bottom: 0;
+  transform-origin: bottom;
+}
+
+@keyframes reel-bars {
+  0%,
+  92% {
+    transform: scaleY(var(--film-bars, 0.33));
+  }
+  100% {
+    transform: scaleY(0);
+  }
+}
+
+.film-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse at 50% 46%,
+    transparent 44%,
+    rgba(3, 4, 5, 0.92) 100%
+  );
+  opacity: var(--film-vignette, 0.45);
+}
+
+@keyframes reel-resolve {
+  0%,
+  90% {
+    opacity: 1;
+  }
+  99% {
+    opacity: 0;
+  }
+}
+
+/* ————— the reel ————— */
+
+.film-track {
+  position: relative;
+  height: var(--track-height);
+  background: transparent;
+}
+
+.film-layer {
+  /* wrappers hold one beat from its cut-over to the end of the reel;
+     top places the sticky child's pin right where its progress begins */
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: calc(var(--from, 0) * (var(--track-height) - 100dvh));
+  contain: strict;
+}
+
+.film-layer[data-away] {
+  content-visibility: hidden;
+}
+
+.film-beat {
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+  width: 100%;
+  display: grid;
+  place-items: center;
+  contain: strict;
+  animation: linear both;
+  animation-timeline: scroll(nearest block);
+}
+
+.film-inner {
+  max-width: 46ch;
+  padding: 0 24px;
+  text-align: center;
+  display: grid;
+  gap: 16px;
+  justify-self: center;
+  /* the parallax layer: one transform, timeline-driven */
+  animation: reel-drift-line linear both;
+  animation-timeline: scroll(nearest block);
+}
+
+/* beat copy stays dark until its entrance fires */
+.film-inner > * {
+  opacity: 0;
+}
+
+.film-kick {
+  font-size: 11px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.film-line {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  font-size: clamp(28px, 4.6vw, 54px);
+  font-weight: 430;
+  line-height: 1.12;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+/* the resolve carries the one ember */
+.film-layer[data-beat='2'] .film-line {
+  color: var(--pulse-strong);
+}
+
+.film-sub {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* crossfade spans; overlaps are the dissolve */
+.film-layer[data-beat='0'] .film-beat {
+  animation-name: reel-void;
+}
+
+.film-layer[data-beat='0'] .film-inner {
+  animation-name: reel-lift-void;
+}
+
+.film-layer[data-beat='1'] .film-beat {
+  animation-name: reel-drift-mask;
+}
+
+.film-layer[data-beat='1'] .film-inner {
+  animation-name: reel-lift-drift;
+}
+
+.film-layer[data-beat='2'] .film-beat {
+  animation-name: reel-focus-mask;
+}
+
+.film-layer[data-beat='2'] .film-inner {
+  animation-name: reel-lift-focus;
+}
+
+@keyframes reel-void {
+  0%,
+  34% {
+    opacity: 1;
+  }
+  44% {
+    opacity: 0;
+  }
+}
+
+@keyframes reel-drift-mask {
+  0%,
+  34% {
+    opacity: 0;
+  }
+  38%,
+  70% {
+    opacity: 1;
+  }
+  76% {
+    opacity: 0;
+  }
+}
+
+@keyframes reel-focus-mask {
+  0%,
+  62% {
+    opacity: 0;
+  }
+  66%,
+  86% {
+    opacity: 1;
+  }
+  92% {
+    opacity: 0;
+  }
+}
+
+@keyframes reel-lift-void {
+  0% {
+    transform: translateY(0);
+  }
+  44% {
+    transform: translateY(-5dvh);
+  }
+}
+
+@keyframes reel-lift-drift {
+  34% {
+    transform: translateY(5dvh);
+  }
+  76% {
+    transform: translateY(-5dvh);
+  }
+}
+
+@keyframes reel-lift-focus {
+  0%,
+  62% {
+    transform: translateY(7dvh);
+  }
+  86% {
+    transform: translateY(0);
+  }
+  92% {
+    transform: translateY(-2dvh);
+  }
+}
+
+/* entrances tween on scene-enter, staggered, compositor-only */
+.film[data-scene='0'] .film-layer[data-beat='0'] .film-kick {
+  animation: film-enter 300ms var(--ease-out) both;
+}
+
+.film[data-scene='0'] .film-layer[data-beat='0'] .film-line {
+  animation: film-enter 480ms var(--ease-out) 60ms both;
+}
+
+.film[data-scene='0'] .film-layer[data-beat='0'] .film-sub {
+  animation: film-enter 560ms var(--ease-out) 140ms both;
+}
+
+.film[data-scene='1'] .film-layer[data-beat='1'] .film-kick {
+  animation: film-enter 300ms var(--ease-out) both;
+}
+
+.film[data-scene='1'] .film-layer[data-beat='1'] .film-line {
+  animation: film-enter 480ms var(--ease-out) 60ms both;
+}
+
+.film[data-scene='1'] .film-layer[data-beat='1'] .film-sub {
+  animation: film-enter 560ms var(--ease-out) 140ms both;
+}
+
+.film[data-scene='2'] .film-layer[data-beat='2'] .film-kick {
+  animation: film-enter 300ms var(--ease-out) both;
+}
+
+.film[data-scene='2'] .film-layer[data-beat='2'] .film-line {
+  animation: film-enter 480ms var(--ease-out) 60ms both;
+}
+
+.film[data-scene='2'] .film-layer[data-beat='2'] .film-sub {
+  animation: film-enter 560ms var(--ease-out) 140ms both;
+}
+
+@keyframes film-enter {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* at left, the resolve hands the day the stage;
+   the shell is gone and the surface is the frame we land on */
+
+/* ————— the projection room ————— */
+
+.film-hud {
+  position: sticky;
+  top: 0;
+  height: 100dvh;
+  pointer-events: none;
+  font-family: var(--font-ui);
+}
+
+.film-stamp {
+  position: absolute;
+  top: 18px;
+  left: 22px;
+  display: flex;
+  gap: 8px;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.film-tools {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  display: flex;
+  gap: 8px;
+}
+
+.film-chip {
+  pointer-events: auto;
+  padding: 4px 12px;
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  background: rgba(8, 9, 10, 0.5);
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition:
+    color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+
+.film-chip:hover {
+  color: var(--ink);
+  border-color: var(--hairline-strong);
+}
+
+.film-ruler {
+  position: absolute;
+  left: 50%;
+  bottom: 26px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+}
+
+.film-dot {
+  pointer-events: auto;
+  position: relative;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.film-dot::after {
+  content: '';
+  position: absolute;
+  inset: 6px;
+  border-radius: 50%;
+  background: var(--muted);
+  opacity: 0.45;
+  transition:
+    background var(--dur-fast) var(--ease-out),
+    opacity var(--dur-fast) var(--ease-out);
+}
+
+.film-dot:hover::after {
+  opacity: 0.8;
+}
+
+.film[data-scene='0'] .film-dot:nth-child(1)::after,
+.film[data-scene='1'] .film-dot:nth-child(2)::after,
+.film[data-scene='2'] .film-dot:nth-child(3)::after {
+  background: var(--ink);
+  opacity: 0.95;
+}
+
+.film-edge {
+  position: absolute;
+  right: 22px;
+  bottom: 24px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+}
+
+/* the machine starves: leaner vignette, same canvas */
+.film[data-quality='low'] .film-vignette {
+  opacity: calc(var(--film-vignette, 0.45) * 0.5);
+}
+
+/* ————— stills: no motion asked, none given ————— */
+
+.film[data-static] .film-track {
+  height: auto;
+}
+
+.film[data-static] .film-screen {
+  display: none;
+}
+
+.film[data-static] .film {
+  background: var(--canvas);
+}
+
+.film[data-static] .film-layer {
+  position: relative;
+  top: auto;
+  bottom: auto;
+  contain: layout paint style;
+}
+
+.film[data-static] .film-beat {
+  position: relative;
+  height: auto;
+  min-height: 100dvh;
+  animation: none;
+  overscroll-behavior: contain;
+}
+
+.film[data-static] .film-inner {
+  animation: none;
+}
+
+.film[data-static] .film-inner > * {
+  opacity: 1;
+  animation: none;
+}
+
+.film[data-static] .film-screen {
+  animation: none;
+}
+
+.film[data-static] .film-dust {
+  display: none;
+}
+
+/* if the OS speaks first, the fallback holds until React re-renders */
+@media (prefers-reduced-motion: reduce) {
+  .film .film-inner > * {
+    animation: none;
+  }
+
+  .film .film-beat {
+    animation: none;
+  }
+
+  .film .film-inner {
+    animation: none;
+  }
+
+  .film .film-screen {
+    animation: none;
+  }
+}

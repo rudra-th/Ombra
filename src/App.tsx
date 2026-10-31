@@ -1,3 +1,4 @@
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { Clock } from './widgets/time/Clock';
 import { Search } from './widgets/search/Search';
 import { Intention } from './widgets/intention/Intention';
@@ -12,11 +13,30 @@ import { Quote } from './widgets/quotes/Quote';
 import { useSettings } from './state/settings';
 import { useDailyTick } from './state/useDailyTick';
 import { getSoundEngine } from './audio/bridge';
-import { useEffect } from 'react';
+
+/** The film is summoned, never in the initial paint — its chunk stays asleep. */
+const Story = lazy(() => import('./story/Story').then((m) => ({ default: m.Story })));
 
 export default function App() {
   const settings = useSettings();
   useDailyTick(); // flips every widget's "today" over at local midnight
+
+  const [filmOpen, setFilmOpen] = useState(false);
+  const typing = () =>
+    document.activeElement instanceof HTMLElement &&
+    (document.activeElement.matches('input, textarea') || document.activeElement.isContentEditable);
+
+  // Shift+S summons the film, Esc is the instant cut, at any hour
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setFilmOpen(false);
+      else if ((e.key === 's' || e.key === 'S') && e.shiftKey && !typing()) {
+        setFilmOpen((open) => !open);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   // The engine arms once per page; settings drive power and volume after.
   useEffect(() => {
@@ -28,7 +48,8 @@ export default function App() {
   return (
     <div className="stage" data-accent={settings.accent}>
       <div className="grain" aria-hidden="true" />
-      <main className="surface">
+      {/* the film takes the screen; the surface goes dark-behind and silent to keys */}
+      <main className="surface" inert={filmOpen}>
         <div className="col-main">
           <div className="arrive a0">
             <Clock name={settings.name} />
@@ -67,6 +88,11 @@ export default function App() {
           <Links />
         </div>
       </main>
+      {filmOpen ? (
+        <Suspense fallback={null}>
+          <Story soundEnabled={settings.sound.enabled} onExit={() => setFilmOpen(false)} />
+        </Suspense>
+      ) : null}
     </div>
   );
 }
