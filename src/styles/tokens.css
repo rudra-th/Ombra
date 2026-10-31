@@ -1,0 +1,65 @@
+/* Ombra — Shadow Study tokens. One ground, one ink, one accent. */
+
+:root {
+  color-scheme: dark;
+
+  /* Surfaces — luminance steps, never shadows */
+  --canvas: #08090a;
+  --panel: #0f1011;
+  --elevated: #191a1b;
+  --overlay: #232528;
+
+  /* Ink */
+  --ink: #f7f8f8;
+  --ink-2: #d0d6e0;
+  --muted: #8a8f98; /* 4.5:1 floor on --canvas — body text never darker */
+
+  /* Hairlines */
+  --hairline: rgba(255, 255, 255, 0.07);
+  --hairline-strong: rgba(255, 255, 255, 0.12);
+
+  /* The one accent — ember */
+  --accent: #d2a96f;
+  --accent-strong: #e5c391;
+  --accent-ink: #211505; /* text on accent */
+  --accent-soft: rgba(210, 169, 111, 0.14);
+
+  /* Accent presets (runtime via [data-accent]) */
+  --pulse: #d2a96f;
+  --pulse-strong: #e5c391;
+  --pulse-soft: rgba(210, 169, 111, 0.14);
+  --pulse-ink: #211505;
+
+  /* Type */
+  --font-display: 'Fraunces Variable', Georgia, 'Times New Roman', serif;
+  --font-ui:
+    'Inter Variable', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --dur-fast: 120ms;
+  --dur: 200ms;
+  --dur-slow: 400ms;
+
+  /* Geometry */
+  --radius: 2px;
+  --radius-round: 999px;
+}
+
+[data-accent='sage'] {
+  --pulse: #a9bfa0;
+  --pulse-strong: #c6d8bd;
+  --pulse-soft: rgba(169, 191, 160, 0.14);
+  --pulse-ink: #10160d;
+}
+
+[data-accent='fog'] {
+  --pulse: #9fb4c7;
+  --pulse-strong: #c2d2e0;
+  --pulse-soft: rgba(159, 180, 199, 0.14);
+  --pulse-ink: #0c1218;
+}
+
+/* In components, always reference --pulse, never a named accent directly. */
