@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import type { WxtStorageItem } from 'wxt/utils/storage';
 
 type AnyItem<T> = WxtStorageItem<T, Record<string, unknown>>;

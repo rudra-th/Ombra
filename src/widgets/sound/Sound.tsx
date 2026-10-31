@@ -1,21 +1,16 @@
-import { useSettings, settingsItem } from '../../state/settings';
+import { useSettings, setSoundPower, setSoundVolume, settingsItem } from '../../state/settings';
 import { updateItem } from '../../state/useStorageValue';
 import { ambienceItem, useAmbience } from './item';
 import { BEDS, levelFor, setBed, setLevel, type BedId } from '../../audio/beds';
 import { getSoundPlayer } from '../../audio/bridge';
 import { useEffect } from 'react';
 
-const BED_LABELS: Record<BedId, string> = {
-  rain: 'rain',
-  brown: 'brown',
-  pink: 'pink',
-  fire: 'fire',
-  cafe: 'cafe',
-  ocean: 'ocean',
-  forest: 'forest',
-  wind: 'wind',
-  birds: 'birds',
-};
+const BEDS_GUI: BedId[] = ['rain', 'brown', 'pink', 'fire', 'cafe', 'ocean', 'forest', 'wind', 'birds'];
+
+const BED_LABELS: Record<BedId, string> = BEDS_GUI.reduce(
+  (map, bed) => ({ ...map, [bed]: bed }),
+  {} as Record<BedId, string>,
+);
 
 /** The mixer deck. Power lives in settings; bed and gains live locally. */
 export function Sound() {
@@ -33,10 +28,7 @@ export function Sound() {
   }, [settings.sound.enabled, ambience]);
 
   const togglePower = () => {
-    void updateItem(settingsItem, (prev) => ({
-      ...prev,
-      sound: { ...prev.sound, enabled: !prev.sound.enabled },
-    }));
+    void setSoundPower(settingsItem, !settings.sound.enabled);
   };
 
   const pickBed = (bed: BedId) => {
@@ -52,10 +44,7 @@ export function Sound() {
   };
 
   const volume = (value: number) => {
-    void updateItem(settingsItem, (prev) => ({
-      ...prev,
-      sound: { ...prev.sound, volume: value },
-    }));
+    void setSoundVolume(settingsItem, value);
   };
 
   const activeBed =
