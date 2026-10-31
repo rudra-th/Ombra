@@ -67,8 +67,8 @@ reorder lands in Phase 4) ·
 decay todos (≤5 visible, yesterday auto-carries "carried over (n)") · notes ·
 bundled quotes (56 shipped; grows toward ~200 — zero network) · tab-stats line + 7-day sparkline ·
 weather (opt-in, Open-Meteo keyless, city typed once — no geolocation) ·
-ambience mixer (rain/brown/pink/fire/cafe/ocean/forest/wind/birds; brown/pink
-procedural; CC0 loops bundled) · breathing rituals (box/4-7-8/triangle with
+ambience mixer (rain/brown/pink/fire/cafe/ocean/forest/wind/birds; all nine
+procedural, no samples) · breathing rituals (box/4-7-8/triangle with
 phase chimes) · focus timer · presets (Morning/Deep Work/Evening) · settings
 drawer with live preview · export/import settings JSON · command palette ·
 quick-hide "pure zen" (double-Esc).
@@ -97,7 +97,8 @@ count). Master Gain + DynamicsCompressor; defaults volume 0.3, **silent by
 default**. Recipes: hover tick (≥3kHz, ≤40ms, ≤−24dBFS), soft click (<80ms),
 story whoosh (200Hz→2kHz noise sweep, ~300ms), boundary chime (523+784Hz
 detuned, 1.5–2s), phase chime for breathing. Sample-accurate scheduler
-(lookahead, never setTimeout). Ambience loops bundled CC0/CC0-surrogate.
+(clock-placed, never setTimeout). Ambience beds fully procedural (rendered
+loops + LFO-shaped filters + clocked sparks/chirps) — no bundled samples.
 
 ## Start guide (First Shadow)
 
@@ -123,8 +124,11 @@ week. mv3: alarms ≥ 0.5min (Chrome 120), ≤ 500 total.
    dark shell boots (<200ms).
 1. **Daily surface** ✅ widgets above (except sound/stats/presets), editorial
    layout, quality pass (inspect + design review loop).
-2. **Sound & ambience** — engine, first-gesture wake, mixer deck, breathing,
-   focus timer.
+2. **Sound & ambience** ✅ engine (lazy ctx, first-gesture wake, hidden-tab
+   suspend), clocked recipes + scheduler, nine procedural beds with ring-out
+   handoffs, mixer deck on the surface (switch · bed chips · level + master
+   sliders), breathing rituals with phase chimes, focus timer with +5
+   extension and boundary chime. Deferrals → honesty notes below.
 3. **Story engine** — the 3-beat film, timecode, velocity chrome, static
    reduced-motion mode, adaptive quality.
 4. **Depth** — stats strip, presets, settings drawer, export/import,
@@ -132,6 +136,31 @@ week. mv3: alarms ≥ 0.5min (Chrome 120), ≤ 500 total.
 5. **First Shadow** — driver.js guide, hints, replay.
 6. **Launch** — icon/logo, screenshots + story GIF, listing copy, privacy
    disclosures, v1.0.0, store submission.
+
+## Phase 2 honesty notes (v0.3-sound)
+
+- **No sample batteries.** The plan allowed either bundled CC0 loops or
+  synthesis; the shipped answer is synthesis for all nine beds. Brown/pink
+  render as looping buffers; ocean/wind shape the same pink bed with slow
+  LFOs; rain/cafe/forest ride filters on shared white/pink; fire sparks and
+  bird chirps come from small interval feeds that schedule strictly on the
+  audio clock. If quality demands in later polish, CC0 batteries may be
+  reevaluated.
+- **Recipes not fully wired.** `hoverTick` and `softClick` specs exist,
+  tested, and sit in the library, but the surface does not yet play them —
+  the deck stays touch-silent beyond its bed. Wiring lands with the Phase 3
+  story chrome (whoosh gates) or a Phase 4 flourish.
+- **No lazy split for audio.** Engine + recipes + player ship statically
+  with the app (~10 kB raw). The worker/render-thread split and dynamic
+  import of the player are Phase 3+ polish, noted for the budget audit.
+- **Write seam now migrates.** `updateItem` passed raw stored bytes, so a
+  legacy `soundEnabled` blob crashed the first deck toggle. Settings writes
+  now migrate-on-write (`setSoundPower`/`setSoundVolume`); legacy bytes are
+  upgraded before the callback sees them, and the flat flag leaves storage.
+- **Surface scroll reworked.** With seven sections, the side column grew
+  taller than many windows: it now scrolls quietly inside its own box on
+  desktop (hidden scrollbar, overscroll contained); stacked single-column
+  windows (≤860px) page-scroll with a hidden scrollbar either way.
 
 ## Deliberately NOT in v1
 
