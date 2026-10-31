@@ -64,7 +64,11 @@ export function Story({ soundEnabled, onExit }: { soundEnabled: boolean; onExit:
   }, []);
 
   useEffect(() => {
-    if (motion !== 'cinema') return;
+    if (motion !== 'cinema') {
+      // stills: every parked layer comes back as a stacked, visible section
+      layerRefs.current.forEach((el) => el?.removeAttribute('data-away'));
+      return;
+    }
     const sc = scrollRef.current;
     const canvas = canvasRef.current;
     const hud = stampRef.current;

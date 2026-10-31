@@ -446,8 +446,14 @@
   display: none;
 }
 
-.film[data-static] .film {
+/* the stills root IS the canvas: the surface must never leak through */
+.film[data-static] {
   background: var(--canvas);
+}
+
+/* the projection room stays pinned during stills — sections stack beneath it */
+.film[data-static] .film-hud {
+  position: fixed;
 }
 
 .film[data-static] .film-layer {
