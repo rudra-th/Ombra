@@ -129,8 +129,13 @@ week. mv3: alarms ≥ 0.5min (Chrome 120), ≤ 500 total.
    handoffs, mixer deck on the surface (switch · bed chips · level + master
    sliders), breathing rituals with phase chimes, focus timer with +5
    extension and boundary chime. Deferrals → honesty notes below.
-3. **Story engine** — the 3-beat film, timecode, velocity chrome, static
-   reduced-motion mode, adaptive quality.
+3. **Story engine** ✅ the summoned three-beat film (`local:film` motion,
+   Shift+S summon, Esc instant cut, lazy chunk), native `scroll()` timelines
+   over a sticky reel (Void → Drift → Focus, resolve into the dashboard),
+   24fps timecode HUD, velocity-coupled letterbox/vignette, wheel-lerp
+   transport with idle weak-magnet snap, scene dots, frame-quantized dust,
+   EMA adaptive quality, auto-exit on resolve. Deferrals → honesty notes
+   below.
 4. **Depth** — stats strip, presets, settings drawer, export/import,
    directories, command palette.
 5. **First Shadow** — driver.js guide, hints, replay.
@@ -148,8 +153,8 @@ week. mv3: alarms ≥ 0.5min (Chrome 120), ≤ 500 total.
   reevaluated.
 - **Recipes not fully wired.** `hoverTick` and `softClick` specs exist,
   tested, and sit in the library, but the surface does not yet play them —
-  the deck stays touch-silent beyond its bed. Wiring lands with the Phase 3
-  story chrome (whoosh gates) or a Phase 4 flourish.
+  the deck stays touch-silent beyond its bed. Wiring landed partially with
+  the Phase 3 story chrome (see Phase 3 notes).
 - **No lazy split for audio.** Engine + recipes + player ship statically
   with the app (~10 kB raw). The worker/render-thread split and dynamic
   import of the player are Phase 3+ polish, noted for the budget audit.
@@ -161,6 +166,41 @@ week. mv3: alarms ≥ 0.5min (Chrome 120), ≤ 500 total.
   taller than many windows: it now scrolls quietly inside its own box on
   desktop (hidden scrollbar, overscroll contained); stacked single-column
   windows (≤860px) page-scroll with a hidden scrollbar either way.
+
+## Phase 3 honesty notes (v0.4-story)
+
+- **No Lenis, no GSAP.** The stack column listed Lenis 1.3 + GSAP; the shipped
+  transport is a ~55-line controller — the wheel steers a target and a lerp
+  (`k = 1 − e^(−dt·9)`) rides it, and a resting hand (400ms idle) gets a
+  900ms ease-out glide to the nearest beat center the magnet reaches (0.2
+  viewport). A single rAF runs it. At three beats this beat both libraries on
+  realism; revisit only if the reel ever grows past five beats.
+- **No `::scroll-marker`.** Scene dots are plain buttons that read the
+  controller's `data-scene` and jump to a beat center on click; the
+  `::scroll-marker` pseudo-element isn't in stable Chromium yet.
+- **Reel geometry lesson.** The first layout attached the sticky screen and
+  HUD as siblings of the track, silently doubling the scroll range (mx 2574
+  instead of 1430). Both now live inside `.film-track`, with the screen
+  carrying `margin-bottom: -100dvh`, so the scroll range is exactly the
+  reel: 3.5 viewports. Each beat's layer wrapper is positioned at its
+  cut-over progress and its sticky child pins for the beat's span.
+- **Recipes: partially wired.** The story plays `whoosh` on every scene
+  handoff and `boundaryChime` as the reel resolves — both only when the
+  sound engine is armed. `hoverTick` and `softClick` remain library-only;
+  they land with the Phase 4 deck polish or are dropped honestly.
+- **Story is now a lazy chunk** (~6.7 kB JS + CSS split on first summon),
+  which resolves Phase 2's "no lazy split" note for the story half. Audio
+  still ships statically — unchanged.
+- **Adaptive quality implemented with hysteresis.** Frame time smooths ExMA
+  style (k 0.2); fps < 45 drops to `data-quality="low"` (dust halved,
+  vignette halved), fps > 56 climbs back. DPR capped at 1.5, grain steps
+  only on 24fps frame boundaries. Shipped beats use no blur, so the
+  "blur as ≤300ms transition" rule currently has nothing to govern.
+- **Native timelines where they shine, one controller concession.**
+  Crossfades, per-beat lifts, the resolve fade, and letterbox retraction
+  are anonymous `scroll()` timeline keyframes; the controller only writes
+  CSS custom properties (bars/vignette), the timecode stamp, and scene
+  attributes — no per-frame style writes to animated elements.
 
 ## Deliberately NOT in v1
 
