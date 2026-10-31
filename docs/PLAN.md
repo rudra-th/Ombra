@@ -201,6 +201,14 @@ week. mv3: alarms ≥ 0.5min (Chrome 120), ≤ 500 total.
   are anonymous `scroll()` timeline keyframes; the controller only writes
   CSS custom properties (bars/vignette), the timecode stamp, and scene
   attributes — no per-frame style writes to animated elements.
+- **Stills needed its own paint + unpark pass.** The first stills
+  stylesheet used an invalid `.film[data-static] .film` selector, so the
+  root stayed transparent and the (inert) dashboard leaked through the
+  stacked sections. Fixed three ways: the stills root paints `--canvas`
+  itself, the projection room pins `fixed` during stills so the stamp,
+  chips, and dots stay reachable at the first screen, and the controller
+  clears layer parking (`data-away`) whenever the reel collapses to
+  stills — parked sections no longer vanish from the stack.
 
 ## Deliberately NOT in v1
 
