@@ -11,7 +11,7 @@
   Widgets = deep but disposable. Nobody combines calm motion + sound + utility.
 - **Anti-goals:** account walls, paywall drip, remote assets, interruptions.
 
-## Locked decisions
+## Stacked decisions
 
 1. Chromium-only v1 (Chrome/Edge/Brave ≥ 116). Firefox later.
 2. Local-first privacy: `storage` ships at install; `topSites`, `favicon`,
@@ -19,6 +19,9 @@
 3. Dashboard on load; the story mode is summoned (Shift+S / palette).
 4. Sound **off** by default; page "wakes" on first gesture (Chrome autoplay
    reality turned into identity).
+5. Weather/Open-Meteo works without `host_permissions` only because the
+   endpoints answer `Access-Control-Allow-Origin: *` — keep it keyless and
+   CORS-only; never widen permissions for it.
 
 ## Design system (Shadow Study)
 
@@ -59,9 +62,10 @@ schema migration. Auto-backup of settings to IndexedDB daily.
 
 Clock+greeting (Fraunces, band-aware up to the minute) · daily intention with
 gentle streak · search (omnibox-first, `/` or ⌘K in-page, engines incl. custom
-bangs) · quick links (manual + opt-in topSites/favicon, ≤9/row, drag reorder) ·
+bangs) · dark shell, quick links (manual + opt-in topSites/favicon, ≤9/row, drag
+reorder lands in Phase 4) ·
 decay todos (≤5 visible, yesterday auto-carries "carried over (n)") · notes ·
-bundled quotes (~200, zero network) · tab-stats line + 7-day sparkline ·
+bundled quotes (56 shipped; grows toward ~200 — zero network) · tab-stats line + 7-day sparkline ·
 weather (opt-in, Open-Meteo keyless, city typed once — no geolocation) ·
 ambience mixer (rain/brown/pink/fire/cafe/ocean/forest/wind/birds; brown/pink
 procedural; CC0 loops bundled) · breathing rituals (box/4-7-8/triangle with
