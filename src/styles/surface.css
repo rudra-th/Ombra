@@ -31,8 +31,18 @@
   min-height: 0;
   /* Optically aligns the first widget label with the greeting baseline */
   padding-top: 28px;
+  padding-right: 10px;
   border-left: 1px solid var(--hairline);
   padding-left: clamp(24px, 3vw, 48px);
+  /* Seven sections outrun some windows: the column scrolls quietly,
+     never a dead end — and never a visible scrollbar in the film. */
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+
+.col-side::-webkit-scrollbar {
+  display: none;
 }
 
 .surface-links {
@@ -723,7 +733,18 @@
 /* ————— Grace for small windows ————— */
 
 @media (max-width: 860px) {
+  body {
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+
+  body::-webkit-scrollbar {
+    display: none;
+  }
+
   .surface {
+    height: auto;
+    min-height: 100vh;
     grid-template-columns: 1fr;
     grid-template-areas:
       'main'
@@ -775,16 +796,6 @@
   }
 }
 
-/* Short windows scroll; the dashboard is never a dead end */
-@media (max-height: 700px) {
-  body {
-    overflow: auto;
-  }
-}
-
-@media (max-height: 700px) {
-  .surface {
-    height: auto;
-  }
-}
+/* The side column scrolls quietly inside its box on desktop; stacked
+   windows (one column) may scroll the page — never a dead end either way. */
 
