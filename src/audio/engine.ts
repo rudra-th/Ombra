@@ -1,8 +1,16 @@
+import { whiteNoise } from './noise';
+
 /** Structural slices of Web Audio so fakes and node types share one contract. */
+export interface AudioParamLike {
+  value: number;
+  setValueAtTime(value: number, when: number): unknown;
+  linearRampToValueAtTime(value: number, when: number): unknown;
+  exponentialRampToValueAtTime(value: number, when: number): unknown;
+  setTargetAtTime(value: number, startTime: number, timeConstant: number): void;
+}
+
 export interface GainLike {
-  gain: {
-    setTargetAtTime(value: number, startTime: number, timeConstant: number): void;
-  };
+  gain: AudioParamLike;
   connect(to: unknown): unknown;
 }
 
@@ -13,12 +21,18 @@ export interface CompLike {
 export interface CtxLike {
   state: string;
   currentTime: number;
+  sampleRate: number;
   resume(): Promise<void>;
   suspend(): Promise<void>;
   close(): Promise<void>;
   createGain(): GainLike;
   createDynamicsCompressor(): CompLike;
+  createBuffer(channels: number, length: number, sampleRate: number): BufferLike;
   destination: unknown;
+}
+
+export interface BufferLike {
+  getChannelData(ch: number): Float32Array;
 }
 
 export interface MasterBus {
@@ -58,6 +72,7 @@ const createMaster = (ctx: CtxLike): MasterBus => {
 export function createSoundEngine(deps: EngineDeps) {
   let ctx: CtxLike | null = null;
   let bus: MasterBus | null = null;
+  let noise: BufferLike | null = null;
   let powered = false;
   let volume = 0.3;
   let armDetach: (() => void) | null = null;
@@ -131,6 +146,18 @@ export function createSoundEngine(deps: EngineDeps) {
 
     bus(): MasterBus | null {
       return bus;
+    },
+
+    /**
+     * The engine's single shared white-noise bed (2s, looped everywhere),
+     * rendered once. Unless filters make it something else, noise is noise.
+     */
+    noiseBuffer(seconds = 2): BufferLike | null {
+      if (noise || !ctx) return noise;
+      const buf = ctx.createBuffer(1, Math.floor(ctx.sampleRate * seconds), ctx.sampleRate);
+      buf.getChannelData(0).set(whiteNoise(Math.floor(ctx.sampleRate * seconds)));
+      noise = buf;
+      return buf;
     },
 
     context(): CtxLike | null {

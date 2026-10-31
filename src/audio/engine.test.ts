@@ -1,9 +1,17 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createSoundEngine, type EngineDeps, type GainLike } from './engine';
+import {
+  createSoundEngine,
+  type EngineDeps,
+  type GainLike,
+} from './engine';
 
 class FakeGain implements GainLike {
   values: number[] = [];
   gain = {
+    value: 1,
+    setValueAtTime: (_v: number, _when: number): void => {},
+    linearRampToValueAtTime: (_v: number, _when: number): void => {},
+    exponentialRampToValueAtTime: (_v: number, _when: number): void => {},
     setTargetAtTime: (value: number, _start?: number, _tau?: number): void => {
       this.values.push(value);
     },
@@ -15,6 +23,7 @@ class FakeGain implements GainLike {
 
 class FakeCtx {
   state: 'running' | 'suspended' | 'closed' = 'suspended';
+  sampleRate = 48000;
   currentTime = 1.25;
   resume = vi.fn(async () => {
     this.state = 'running';
@@ -29,6 +38,9 @@ class FakeCtx {
   createGain = vi.fn((): FakeGain => new FakeGain());
   createDynamicsCompressor = vi.fn(() => ({
     connect: (_to: unknown) => {},
+  }));
+  createBuffer = vi.fn((_channels: number, length: number, _rate: number) => ({
+    getChannelData: (_ch: number) => new Float32Array(length),
   }));
   gains(): FakeGain[] {
     return this.createGain.mock.results.map((r) => r.value as FakeGain);
