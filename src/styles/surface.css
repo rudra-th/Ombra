@@ -39,17 +39,20 @@
   grid-area: links;
 }
 
-/* ————— Arrivals: each block lands 70–110 ms after the last ————— */
+/* ————— Arrivals: each block lands 80–110 ms after the last ————— */
 
 .arrive {
   animation: arrive 700ms var(--ease-out) both;
 }
 
-.a0 { animation-delay: 0ms; }
-.a1 { animation-delay: 90ms; }
-.a2 { animation-delay: 180ms; }
-.a3 { animation-delay: 300ms; }
-.a4 { animation-delay: 380ms; }
+.a0  { animation-delay: 0ms; }
+.a1  { animation-delay: 90ms; }
+.a2a { animation-delay: 180ms; }
+.a2b { animation-delay: 250ms; }
+.a2c { animation-delay: 320ms; }
+.a2d { animation-delay: 390ms; }
+.a3  { animation-delay: 460ms; }
+.a4  { animation-delay: 560ms; }
 
 /* ————— Hero ————— */
 
@@ -324,9 +327,9 @@
   border: none;
   cursor: pointer;
   color: var(--muted);
-  font-size: 10px;
+  font-size: 13px;
   opacity: 0;
-  padding: 2px 4px;
+  padding: 6px 8px;
   transition: opacity var(--dur-fast) var(--ease-out);
 }
 
@@ -335,9 +338,9 @@
   position: relative;
 }
 
-.todo-row { padding-right: 22px; }
+.todo-row { padding-right: 24px; }
 
-.link-item { padding-right: 18px; }
+.link-item { padding-right: 20px; }
 
 .todo-row:hover .row-remove,
 .link-item:hover .row-remove,
@@ -345,8 +348,13 @@
   opacity: 0.7;
 }
 
-.row-remove:hover {
-  opacity: 1 !important;
+.todo-row:hover .row-remove:hover,
+.link-item:hover .row-remove:hover {
+  opacity: 1;
+}
+
+.row-remove:hover,
+.row-remove:focus-visible {
   color: var(--ink);
 }
 
@@ -546,14 +554,8 @@
 
 /* ————— Grace for small windows ————— */
 
-@media (max-width: 860px), (max-height: 560px) {
-  body {
-    overflow: auto;
-  }
-
+@media (max-width: 860px) {
   .surface {
-    height: auto;
-    min-height: 100vh;
     grid-template-columns: 1fr;
     grid-template-areas:
       'main'
@@ -575,11 +577,35 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .arrive {
+  .arrive,
+  .links-picker {
     animation: none;
   }
 
-  .link-item > a::after {
+  .arrive,
+  .link-item > a::after,
+  .links-row,
+  .row-remove,
+  .link-item > a,
+  .links-plus,
+  .widget-trigger,
+  .todo-ring,
+  .todo-text,
+  .notes-box {
     transition: none;
   }
 }
+
+/* Short windows scroll; the dashboard is never a dead end */
+@media (max-height: 700px) {
+  body {
+    overflow: auto;
+  }
+}
+
+@media (max-height: 700px) {
+  .surface {
+    height: auto;
+  }
+}
+

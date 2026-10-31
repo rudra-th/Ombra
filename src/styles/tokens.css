@@ -7,7 +7,6 @@
   --canvas: #08090a;
   --panel: #0f1011;
   --elevated: #191a1b;
-  --overlay: #232528;
 
   /* Ink */
   --ink: #f7f8f8;
@@ -18,13 +17,7 @@
   --hairline: rgba(255, 255, 255, 0.07);
   --hairline-strong: rgba(255, 255, 255, 0.12);
 
-  /* The one accent — ember */
-  --accent: #d2a96f;
-  --accent-strong: #e5c391;
-  --accent-ink: #211505; /* text on accent */
-  --accent-soft: rgba(210, 169, 111, 0.14);
-
-  /* Accent presets (runtime via [data-accent]) */
+  /* The one accent — set by [data-accent]; components reference --pulse */
   --pulse: #d2a96f;
   --pulse-strong: #e5c391;
   --pulse-soft: rgba(210, 169, 111, 0.14);
@@ -37,15 +30,11 @@
 
   /* Motion */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
-  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
-  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
   --dur-fast: 120ms;
   --dur: 200ms;
-  --dur-slow: 400ms;
 
   /* Geometry */
   --radius: 2px;
-  --radius-round: 999px;
 }
 
 [data-accent='sage'] {
@@ -62,4 +51,4 @@
   --pulse-ink: #0c1218;
 }
 
-/* In components, always reference --pulse, never a named accent directly. */
+/* Components reference --pulse, never a named accent. Accent presets live above. */
