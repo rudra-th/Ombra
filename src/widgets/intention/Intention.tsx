@@ -8,10 +8,20 @@ export function Intention() {
   const record = useStorageValue(intentionItem) as IntentionRecord;
   const today = todayKey(new Date());
   const isToday = record.key === today;
-  const [draft, setDraft] = useState(isToday ? record.text : '');
+  const [draft, setDraft] = useState('');
+  const [editing, setEditing] = useState(false);
+  const source = isToday ? record.text : '';
+
+  // Follow the record while idle; never echo over fresh keystrokes mid-edit.
+  useEffect(() => {
+    if (!editing) setDraft(source);
+  }, [source, editing]);
 
   const commit = () => {
-    void intentionItem.setValue(commitIntention(record, draft, today));
+    setEditing(false);
+    if (draft !== record.text) {
+      void intentionItem.setValue(commitIntention(record, draft, today));
+    }
   };
 
   return (
@@ -22,9 +32,10 @@ export function Intention() {
         type="text"
         autoComplete="off"
         spellCheck={false}
-        placeholder={isToday ? record.text || 'Set the day' : 'Set the day'}
+        placeholder={isToday && record.text ? '' : 'Set the day'}
         aria-label="Intention for today"
         value={draft}
+        onFocus={() => setEditing(true)}
         onChange={(e) => setDraft(e.target.value)}
         onBlur={commit}
         onKeyDown={(e) => {

@@ -29,7 +29,8 @@
   flex-direction: column;
   gap: 40px;
   min-height: 0;
-  padding-top: 6px;
+  /* Optically aligns the first widget label with the greeting baseline */
+  padding-top: 28px;
   border-left: 1px solid var(--hairline);
   padding-left: clamp(24px, 3vw, 48px);
 }
@@ -147,6 +148,7 @@
 
 .main-quote {
   max-width: 52ch;
+  margin-bottom: 34px;
 }
 
 .quote {
@@ -312,10 +314,12 @@
   opacity: 0.65;
 }
 
-/* Shared quiet remove — appears only on hover of its row */
+/* Shared quiet remove — hover-only, never occupying layout width */
 .row-remove {
-  flex: none;
-  align-self: center;
+  position: absolute;
+  right: -2px;
+  top: 50%;
+  translate: 0 -50%;
   background: none;
   border: none;
   cursor: pointer;
@@ -325,6 +329,15 @@
   padding: 2px 4px;
   transition: opacity var(--dur-fast) var(--ease-out);
 }
+
+.todo-row,
+.link-item {
+  position: relative;
+}
+
+.todo-row { padding-right: 22px; }
+
+.link-item { padding-right: 18px; }
 
 .todo-row:hover .row-remove,
 .link-item:hover .row-remove,
@@ -406,6 +419,12 @@
   align-items: center;
 }
 
+.links-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 16px;
+}
+
 .links-input {
   font-size: 13px;
   border-bottom: 1px solid var(--hairline);
@@ -419,6 +438,110 @@
 
 .links-input:focus {
   border-color: var(--hairline-strong);
+}
+
+/* ————— Notes ————— */
+
+.notes-box {
+  min-height: 76px;
+  line-height: 1.6;
+  resize: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--dur-fast) var(--ease-out);
+}
+
+.notes-box:hover {
+  border-color: var(--hairline);
+}
+
+.notes-box:focus {
+  border-color: var(--hairline-strong);
+}
+
+/* ————— Weather ————— */
+
+.weather-line {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.weather-temp {
+  font-size: 22px;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.weather-cond {
+  font-size: 13px;
+  color: var(--ink-2);
+}
+
+.weather-city {
+  margin-left: 4px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.widget-trigger {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--muted);
+  padding: 0;
+  letter-spacing: 0.04em;
+  justify-self: start;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.widget-trigger:hover {
+  color: var(--ink);
+}
+
+/* ————— Top-sites picker ————— */
+
+.links-picker {
+  position: fixed;
+  z-index: 30;
+  bottom: 84px;
+  left: clamp(32px, 6vw, 96px);
+  width: min(360px, 90vw);
+  max-height: 300px;
+  overflow: auto;
+  background: var(--panel);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  display: grid;
+  gap: 10px;
+  animation: arrive 260ms var(--ease-out) both;
+}
+
+.links-picker ul {
+  display: grid;
+  gap: 2px;
+}
+
+.links-pick {
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  font-size: 13px;
+  color: var(--ink-2);
+  padding: 6px 8px;
+  border-radius: var(--radius);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background var(--dur-fast) var(--ease-out);
+}
+
+.links-pick:hover {
+  background: var(--elevated);
+  color: var(--ink);
 }
 
 /* ————— Grace for small windows ————— */
