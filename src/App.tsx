@@ -7,9 +7,11 @@ import { Weather } from './widgets/weather/Weather';
 import { Links } from './widgets/links/Links';
 import { Quote } from './widgets/quotes/Quote';
 import { useSettings } from './state/settings';
+import { useDailyTick } from './state/useDailyTick';
 
 export default function App() {
   const settings = useSettings();
+  useDailyTick(); // flips every widget's "today" over at local midnight
 
   return (
     <div className="stage" data-accent={settings.accent}>
@@ -27,16 +29,16 @@ export default function App() {
           </div>
         </div>
         <aside className="col-side">
-          <div className="arrive a2">
+          <div className="arrive a2a">
             <Intention />
           </div>
-          <div className="arrive a2">
+          <div className="arrive a2b">
             <Todos />
           </div>
-          <div className="arrive a2">
+          <div className="arrive a2c">
             <Notes />
           </div>
-          <div className="arrive a2">
+          <div className="arrive a2d">
             <Weather />
           </div>
         </aside>
