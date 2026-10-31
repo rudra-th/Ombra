@@ -8,7 +8,7 @@ export const todosItem = storage.defineItem<TodoItem[]>('local:todos', {
 const makeId = (today: string): string =>
   `${today}-${Date.now().toString(36)}`;
 
-/** Adding prunes yesterday's decay first, so storage never bloats. */
+/** Adding prunes only dissolved items (finished before today); carried stay counted. */
 export function addTodo(
   list: TodoItem[],
   text: string,
@@ -16,10 +16,21 @@ export function addTodo(
 ): TodoItem[] {
   const trimmed = text.trim();
   if (!trimmed) return list;
-  const kept = decayTodos(list, today).active;
+  const kept = list.filter(
+    (it) =>
+      it.created === today ||
+      (it.done && it.doneAt === today) ||
+      !it.done,
+  );
   return [
     ...kept,
-    { id: makeId(today), text: trimmed, created: today, done: false, doneAt: null },
+    {
+      id: makeId(today),
+      text: trimmed,
+      created: today,
+      done: false,
+      doneAt: null,
+    },
   ];
 }
 

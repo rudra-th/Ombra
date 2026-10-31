@@ -1,8 +1,14 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
+import { browser } from 'wxt/browser';
 import { linksItem } from './item';
 import { addLink, removeLink, type LinkItem } from './store';
 import { useStorageValue } from '../../state/useStorageValue';
+
+interface Top_site {
+  title: string;
+  url: string;
+}
 
 /** One quiet row, nine wide at most, opt-in and hand-built. */
 export function Links() {
@@ -10,6 +16,7 @@ export function Links() {
   const [open, setOpen] = useState(false);
   const [label, setLabel] = useState('');
   const [url, setUrl] = useState('');
+  const [picker, setPicker] = useState<Top_site[] | null>(null);
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
@@ -19,8 +26,67 @@ export function Links() {
     setOpen(false);
   };
 
+  const openTopSites = async () => {
+    try {
+      const granted =
+        (await browser.permissions.contains({ permissions: ['topSites'] })) ||
+        (await browser.permissions.request({ permissions: ['topSites'] }));
+      if (!granted) return;
+      const top = await browser.topSites.get();
+      setPicker(top.slice(0, 12) as Top_site[]);
+    } catch {
+      setPicker(null);
+    }
+  };
+
+  useEffect(() => {
+    if (!picker) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setPicker(null);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [picker]);
+
+  const pick = (site: Top_site) => {
+    void linksItem.setValue(
+      addLink(links, site.title || new URL(site.url).hostname, site.url),
+    );
+    setPicker(null);
+  };
+
+  const candidates = picker?.filter(
+    (s) => !links.some((l) => l.url === s.url),
+  );
+
   return (
     <nav className="links" aria-label="Quick links">
+      {candidates && candidates.length > 0 && (
+        <div className="links-picker" role="dialog" aria-label="Top sites">
+          <p className="widget-label">Top sites — add quietly</p>
+          <ul>
+            {candidates.map((s) => (
+              <li key={s.url}>
+                <button
+                  type="button"
+                  className="links-pick"
+                  onClick={() => pick(s)}
+                  title={s.url}
+                >
+                  {s.title || s.url}
+                </button>
+              </li>
+            ))}
+          </ul>
+          <button
+            type="button"
+            className="widget-trigger"
+            onClick={() => setPicker(null)}
+          >
+            ✕ close
+          </button>
+        </div>
+      )}
       <ul className="links-row">
         {links.map((l) => (
           <li key={l.id} className="link-item">
@@ -62,14 +128,23 @@ export function Links() {
               />
             </form>
           ) : (
-            <button
-              type="button"
-              className="links-plus"
-              aria-label="Add a link"
-              onClick={() => setOpen(true)}
-            >
-              ＋ add
-            </button>
+            <span className="links-actions">
+              <button
+                type="button"
+                className="links-plus"
+                aria-label="Add a link"
+                onClick={() => setOpen(true)}
+              >
+                ＋ add
+              </button>
+              <button
+                type="button"
+                className="links-plus"
+                onClick={() => void openTopSites()}
+              >
+                top sites
+              </button>
+            </span>
           )}
         </li>
       </ul>
