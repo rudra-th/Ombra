@@ -19,10 +19,10 @@ const commands: Command[] = [
 ];
 
 describe('the palette filter', () => {
-  it('offers everything, ranked, capped at seven, when the field is empty', () => {
+  it('offers everything, in the shipped order, when the field is empty', () => {
     const all = filterCommands(commands, '');
-    expect(all).toHaveLength(7);
-    expect(all[0]!.id).toBe('film'); // the original order is the rank
+    expect(all).toHaveLength(commands.length); // nothing culled — even the buried commands invite themselves
+    expect(all).toEqual(commands);
   });
 
   it('matches substrings without case', () => {

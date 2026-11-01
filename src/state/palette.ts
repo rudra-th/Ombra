@@ -6,7 +6,8 @@ export interface Command {
   hint?: string;
 }
 
-/** The eye of the palette: no more than seven lines at a time. */
+/** The eye of the fuzzy view: no more than seven scored lines at a time.
+ * The empty field is uncapped — every command stays reachable by eye. */
 export const PALETTE_CAP = 7;
 
 /** Substring search, modest scoring: a match at a word's start reads
@@ -14,7 +15,7 @@ export const PALETTE_CAP = 7;
  * Generic over the command type so its runs survive the filter. */
 export function filterCommands<T extends Command>(commands: T[], query: string): T[] {
   const q = query.trim().toLowerCase();
-  if (!q) return commands.slice(0, PALETTE_CAP);
+  if (!q) return commands;
   const scored: Array<{ cmd: T; score: number }> = [];
   for (const cmd of commands) {
     const label = cmd.label.toLowerCase();

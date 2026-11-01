@@ -5,7 +5,7 @@ import { filterCommands, type Command } from '../../state/palette';
 export type PaletteCommand = Command & { run: () => void };
 
 /**
- * The command palette: a search field with seven rows behind it. Summoned,
+ * The command palette: a search field with every command behind it. Summoned,
  * typed, chosen — nothing here is scrolled for, nothing memorized.
  */
 export function Palette({
