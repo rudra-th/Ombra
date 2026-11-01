@@ -139,6 +139,10 @@ week. mv3: alarms ≥ 0.5min (Chrome 120), ≤ 500 total.
 4. **Depth** ✅ stats strip, presets, settings drawer, export/import,
    command palette, pure-zen quick hide, deck touch sounds. Deferrals →
    honesty notes below.
+4b. **Shortcut tiles** ✅ stats and favicon tiles shipped hidden (schema
+   defaults, migrated blobs inherit the default), inline tile rename, inked
+   B&W favicons behind an opt-in permission ask, drawer Surface section,
+   palette commands, threaded write queue. Deferrals → honesty notes below.
 5. **First Shadow** — driver.js guide, hints, replay.
 6. **Launch** — icon/logo, screenshots + story GIF, listing copy, privacy
    disclosures, v1.0.0, store submission.
@@ -187,6 +191,45 @@ week. mv3: alarms ≥ 0.5min (Chrome 120), ≤ 500 total.
   import textarea, stacked quiet actions instead of scattered boxes), and
   pure zen extended to hide the settings gear — a pure stage now holds only
   greeting, clock, and search.
+
+## Phase 4b honesty notes (v0.6-tiles)
+
+- **Both new surfaces ship hidden.** `statsVisible: false` and
+  `linkIcons: false` sit in `DEFAULT_SETTINGS`, and the schema door hands any
+  legacy blob the defaults (`raw.field === true` — absent means off). Fresh
+  installs and migrated saves see the same calm surface until a switch is
+  flipped in the drawer's **Surface** section or run from the palette
+  (`tab stats: show/hide`, `shortcut icons: on/off`).
+- **Favicons are opt-in, not ambient.** The `favicon` permission stays
+  optional in the manifest; the ask fires only when the icons toggle is
+  flipped on. The seam checks `contains` first (a prior grant never re-prompts),
+  a denial leaves the switch off with no write, and revoked grants fall back
+  to letter tiles rather than broken images. Chrome serves the `_favicon/`
+  route from its local cache — no network of ours, staying local-first.
+- **Inked, not recolored.** The B&W look is CSS (`grayscale(1)
+  brightness(1.08)`) on a `--canvas` chip so white marks stay legible; a tile
+  with no favicon (or the preview, which has no `_favicon/` route) shows a
+  letter glyph — the label's first initial on the same chip.
+- **Rename is hover, not double-click.** Native `dblclick` would navigate
+  first (the tile is a real anchor), so the pencil is a second hover-revealed
+  button beside ✕. Enter commits, **Esc and blur abort**; the drag machinery
+  suspends while editing. Blank labels and strangers are refused by
+  `renameLink` (the map returns the old array, never a new one — pointer
+  stability is asserted).
+- **Keyboard-open of tiles deliberately excluded.** `1`–`9` bindings to open
+  the first nine links read efficient but are exactly the ambient aggression
+  a zen surface avoids; the palette remains the summon path.
+- **The visibility write race.** The live pass caught two toggles clicked in
+  one batch clobbering each other (both read-modify-writes read the same
+  snapshot; the second's merge undid the first's field). Both write seams now
+  join a per-item queue (`enqueueWrite`) — each write starts only after the
+  previous has fully landed, and a failed write never deadheads the chain
+  (tests: the three-bump counter lands at 3, not 1).
+- **Preview letter-tiles become the real demo trail.** The shim's
+  `permissions` reports granted while `runtime.getURL` is absent, so the
+  preview exercises exactly "granted, always glyph" — the true-favicon path
+  (B&W imgs) is real-extension territory and only visually verifiable after a
+  manual load there. Unit tests cover the permission and route seams.
 
 ## Phase 2 honesty notes (v0.3-sound)
 
