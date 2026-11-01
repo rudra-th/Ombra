@@ -36,12 +36,31 @@ export function useStorageValue<T>(item: AnyItem<T>): T {
 /**
  * Read-modify-write in one seam, so no widget mutates a render-time snapshot.
  * Two windows open at once are ordinary; this keeps their writes from eating
- * each other's work (the classic lost-update race).
+ * each other's work (the classic lost-update race). A write joins this item's
+ * tail only after the previous write has fully landed — React batches sibling
+ * controls into one commit, and two toggles reading the same snapshot would
+ * otherwise silently undo each other's fields.
  */
+const writeTails = new WeakMap<object, Promise<void>>();
+
+export function enqueueWrite<T extends object>(
+  item: T,
+  write: () => Promise<void>,
+): Promise<void> {
+  // a failed tail never deadheads the chain: the next write still reads
+  const run = (writeTails.get(item) ?? Promise.resolve())
+    .catch(() => undefined)
+    .then(write);
+  writeTails.set(item, run.catch(() => undefined));
+  return run;
+}
+
 export async function updateItem<T>(
   item: AnyItem<T>,
   update: (prev: T) => T,
 ): Promise<void> {
-  const prev = await item.getValue();
-  await item.setValue(update(prev));
+  await enqueueWrite(item, async () => {
+    const prev = await item.getValue();
+    await item.setValue(update(prev));
+  });
 }

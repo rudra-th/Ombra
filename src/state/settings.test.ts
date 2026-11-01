@@ -1,11 +1,13 @@
 import { describe, expect, it, vi } from 'vitest';
-import { DEFAULT_SETTINGS } from './schema';
+import { DEFAULT_SETTINGS, migrateSettings } from './schema';
 import {
   exportItem,
   importItem,
+  setLinkIcons,
   setSettingsAccent,
   setSettingsName,
   setSoundPower,
+  setStatsVisible,
   type SettingsSeam,
 } from './settings';
 
@@ -68,6 +70,69 @@ describe('defaults still guard the fresh path', () => {
   it('ship sound off at a quiet 0.3', () => {
     expect(DEFAULT_SETTINGS.sound.enabled).toBe(false);
     expect(DEFAULT_SETTINGS.sound.volume).toBe(0.3);
+  });
+
+  it('ship the tab-rhythm strip hidden and shortcut icons off', () => {
+    expect(DEFAULT_SETTINGS.statsVisible).toBe(false);
+    expect(DEFAULT_SETTINGS.linkIcons).toBe(false);
+  });
+});
+
+describe('surface toggles', () => {
+  it('hand old blobs the hidden defaults at the schema door', () => {
+    const complete = migrateSettings({ version: 1, name: 'Ro' });
+    expect(complete.statsVisible).toBe(false);
+    expect(complete.linkIcons).toBe(false);
+  });
+
+  it('write the tab-stats toggle both ways', async () => {
+    const item = fakeItem({ version: 1, name: 'Ro' });
+    await setStatsVisible(item, true);
+    const on = await readBack(item) as unknown as { statsVisible: boolean };
+    expect(on.statsVisible).toBe(true);
+    await setStatsVisible(item, false);
+    const off = await readBack(item) as unknown as { statsVisible: boolean };
+    expect(off.statsVisible).toBe(false);
+  });
+
+  it('write the shortcut-icons toggle', async () => {
+    const item = fakeItem({ version: 1, name: 'Ro' });
+    await setLinkIcons(item, true);
+    const written = await readBack(item) as unknown as { linkIcons: boolean };
+    expect(written.linkIcons).toBe(true);
+    // junk bytes collapse to the shipped hidden default, never a surprise on
+    await importItem(item, JSON.stringify({ garbage: true }));
+    const reset = await readBack(item) as unknown as { linkIcons: boolean };
+    expect(reset.linkIcons).toBe(false);
+  });
+});
+
+/**
+ * The store's own write latency (a real chrome.storage takes a microtask or
+ * few) — two toggles fired in one React batch read the same snapshot before
+ * either write lands, and the second's merge would undo the first's field.
+ */
+const racyStore = (blob: unknown): SettingsSeam => {
+  let stored: unknown = blob;
+  return {
+    getValue: async () => stored,
+    setValue: async (v: unknown) => {
+      await Promise.resolve();
+      stored = v;
+    },
+  };
+};
+
+describe('concurrent writes keep each other', () => {
+  it('threads two surface toggles in one batch through the write tail', async () => {
+    const item = racyStore({ version: 1, name: 'Ro' });
+    await Promise.all([setStatsVisible(item, true), setLinkIcons(item, true)]);
+    const written = await readBack(item) as unknown as {
+      statsVisible: boolean;
+      linkIcons: boolean;
+    };
+    expect(written.statsVisible).toBe(true);
+    expect(written.linkIcons).toBe(true);
   });
 });
 

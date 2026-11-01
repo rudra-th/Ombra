@@ -15,6 +15,8 @@ describe('DEFAULT_SETTINGS', () => {
         blur: 0,
         fit: 'cover',
       },
+      statsVisible: false,
+      linkIcons: false,
     });
   });
 });
@@ -55,7 +57,7 @@ describe('migrateSettings', () => {
     const merged = migrateSettings({ name: 'R', hacker: true });
     expect(merged).not.toHaveProperty('hacker');
     expect(Object.keys(merged).sort()).toEqual(
-      ['accent', 'name', 'scene', 'sound', 'version'].sort(),
+      ['accent', 'linkIcons', 'name', 'scene', 'sound', 'statsVisible', 'version'].sort(),
     );
   });
 

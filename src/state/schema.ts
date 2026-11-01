@@ -23,6 +23,10 @@ export interface Settings {
   accent: Accent;
   sound: SoundSettings;
   scene: SceneSettings;
+  /** The tab-rhythm strip under the quote — shipped hidden, never forced. */
+  statsVisible: boolean;
+  /** Favicon tiles on the links row; off until both option and permission agree. */
+  linkIcons: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -37,6 +41,8 @@ export const DEFAULT_SETTINGS: Settings = {
     blur: 0,
     fit: 'cover',
   },
+  statsVisible: false,
+  linkIcons: false,
 };
 
 const asRecord = (v: unknown): v is Record<string, unknown> =>
@@ -96,5 +102,7 @@ export function migrateSettings(raw: unknown): Settings {
     accent: asChoice(raw.accent, ACCENTS, DEFAULT_SETTINGS.accent),
     sound: migrateSound(raw.sound, raw.soundEnabled),
     scene: migrateScene(raw.scene),
+    statsVisible: raw.statsVisible === true,
+    linkIcons: raw.linkIcons === true,
   };
 }

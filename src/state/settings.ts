@@ -4,7 +4,8 @@ import {
   DEFAULT_SETTINGS,
   migrateSettings,
   type Settings,
-} from './schema';import { useStorageValue } from './useStorageValue';
+} from './schema';
+import { useStorageValue, enqueueWrite } from './useStorageValue';
 
 export const settingsItem = storage.defineItem<Settings>('sync:settings', {
   fallback: DEFAULT_SETTINGS,
@@ -26,13 +27,17 @@ export const useSettings = (item: SettingsItem = settingsItem): Settings =>
  * Read-modify-write against schemaed bytes: a legacy stored blob is
  * migrated BEFORE the update callback sees it, so toggles can never
  * crash on an old saved shape and the legacy flag never reuses memory.
+ * Writes join the item's tail, so two toggles in one commit never
+ * merge from the same snapshot.
  */
-export async function updateSettings(
+export function updateSettings(
   item: SettingsSeam,
   update: (prev: Settings) => Settings,
 ): Promise<void> {
-  const prev = migrateSettings(await item.getValue());
-  await item.setValue(update(prev));
+  return enqueueWrite(item, async () => {
+    const prev = migrateSettings(await item.getValue());
+    await item.setValue(update(prev));
+  });
 }
 
 /** Power toggle: the one settings write the deck performs. */
@@ -62,6 +67,19 @@ export function setSettingsAccent(
   accent: 'ember' | 'sage' | 'fog',
 ): Promise<void> {
   return updateSettings(item, (prev) => ({ ...prev, accent }));
+}
+
+/** The tab-rhythm strip's visibility; the shipped default is hidden. */
+export function setStatsVisible(item: SettingsSeam, visible: boolean): Promise<void> {
+  return updateSettings(item, (prev) => ({ ...prev, statsVisible: visible }));
+}
+
+/**
+ * Favicon tiles on the links row. Only the setting — the permission gate
+ * lives beside the links row, where the ask actually happens.
+ */
+export function setLinkIcons(item: SettingsSeam, on: boolean): Promise<void> {
+  return updateSettings(item, (prev) => ({ ...prev, linkIcons: on }));
 }
 
 /** The bytes as they would be stored: readable JSON for the drawer's export. */
