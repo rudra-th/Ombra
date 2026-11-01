@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { addLink, removeLink, reorderLinks, type LinkItem } from './store';
+import { addLink, removeLink, renameLink, reorderLinks, type LinkItem } from './store';
 
 const link = (label: string, url: string): LinkItem => ({
   id: url,
@@ -19,6 +19,22 @@ describe('reorderLinks', () => {
     expect(reorderLinks(four, 'a', 'a')).toBe(four);
     expect(reorderLinks(four, 'x', 'a')).toBe(four);
     expect(reorderLinks(four, 'a', 'x')).toBe(four);
+  });
+});
+
+describe('renameLink', () => {
+  it('relabels exactly the one link, trimmed', () => {
+    const two = [link('A', 'a'), link('B', 'b')];
+    const next = renameLink(two, 'b', '  Post  ');
+    expect(next.find((l) => l.url === 'b')!.label).toBe('Post');
+    expect(next.find((l) => l.url === 'a')!.label).toBe('A');
+  });
+
+  it('refuses blank labels and strangers, keeps ids stable', () => {
+    const one = [link('A', 'a')];
+    expect(renameLink(one, 'a', '   ')).toBe(one);
+    expect(renameLink(one, 'x', 'Z')).toBe(one);
+    expect(renameLink(one, 'a', 'Z')[0]!.id).toBe('a');
   });
 });
 

@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import { browser } from 'wxt/browser';
 import { linksItem } from './item';
-import { addLink, removeLink, reorderLinks, type LinkItem } from './store';
+import { addLink, removeLink, renameLink, reorderLinks, type LinkItem } from './store';
 import { useStorageValue, updateItem } from '../../state/useStorageValue';
+import { useSettings } from '../../state/settings';
+import { ensureIconsPermission, faviconUrl, type PermissionsSeam } from './icons';
 
 interface Top_site {
   title: string;
@@ -23,12 +25,35 @@ const safeUrl = (raw: string): URL | null => {
 /** One quiet row, nine wide at most, opt-in and hand-built. */
 export function Links() {
   const links = useStorageValue(linksItem) as LinkItem[];
+  const settings = useSettings();
   const [open, setOpen] = useState(false);
   const [label, setLabel] = useState('');
   const [url, setUrl] = useState('');
   const [picker, setPicker] = useState<PickerState>({ kind: 'closed' });
   const [dragUrl, setDragUrl] = useState<string | null>(null);
   const [overUrl, setOverUrl] = useState<string | null>(null);
+  const [iconsReady, setIconsReady] = useState(false);
+  const [broken, setBroken] = useState<Set<string>>(new Set());
+  const [editUrl, setEditUrl] = useState<string | null>(null);
+  const [draft, setDraft] = useState('');
+
+  // Tiles may carry their favicon: checked once per toggle-on, through the
+  // optional permission's door. The page's route answers only when granted.
+  useEffect(() => {
+    if (!settings.linkIcons) {
+      setIconsReady(false);
+      return;
+    }
+    let alive = true;
+    void ensureIconsPermission(
+      browser.permissions as unknown as PermissionsSeam,
+    ).then((ok) => {
+      if (alive) setIconsReady(ok);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [settings.linkIcons]);
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
@@ -52,6 +77,32 @@ export function Links() {
     } catch {
       setPicker({ kind: 'open', sites: [], note: 'Top sites unavailable here.' });
     }
+  };
+
+  const commitRename = (target: string) => {
+    void updateItem(linksItem, (prev) => renameLink(prev, target, draft));
+    setEditUrl(null);
+  };
+
+  /** The favicon inked gray; a missing one falls back to a letter tile. */
+  const tileIcon = (l: LinkItem) => {
+    if (!iconsReady) return null;
+    const route = faviconUrl(l.url);
+    if (route === null || broken.has(l.url)) {
+      return (
+        <span className="link-glyph" aria-hidden="true">
+          {l.label.charAt(0).toUpperCase()}
+        </span>
+      );
+    }
+    return (
+      <img
+        className="link-icon"
+        src={route}
+        alt=""
+        onError={() => setBroken((cur) => new Set(cur).add(l.url))}
+      />
+    );
   };
 
   useEffect(() => {
@@ -108,55 +159,89 @@ export function Links() {
   return (
     <nav className="links" aria-label="Quick links">
       <ul className="links-row">
-        {links.map((l) => (
-          <li
-            key={l.id}
-            className={`link-item${overUrl === l.url ? ' link-over' : ''}`}
-            draggable
-            onDragStart={(e) => {
-              setDragUrl(l.url);
-              e.dataTransfer.effectAllowed = 'move';
-              try {
-                e.dataTransfer.setData('text/plain', l.url);
-              } catch {
-                /* some embedders refuse setData — the local state carries it */
-              }
-            }}
-            onDragOver={(e) => {
-              if (dragUrl === null) return;
-              e.preventDefault();
-              e.dataTransfer.dropEffect = 'move';
-              setOverUrl(l.url);
-            }}
-            onDragLeave={() => setOverUrl((cur) => (cur === l.url ? null : cur))}
-            onDrop={(e) => {
-              e.preventDefault();
-              if (dragUrl && dragUrl !== l.url) {
-                void updateItem(linksItem, (prev) => reorderLinks(prev, dragUrl, l.url));
-              }
-              setDragUrl(null);
-              setOverUrl(null);
-            }}
-            onDragEnd={() => {
-              setDragUrl(null);
-              setOverUrl(null);
-            }}
-          >
-            <a href={l.url} target="_blank" rel="noreferrer" draggable={false}>
-              {l.label}
-            </a>
-            <button
-              type="button"
-              className="row-remove"
-              aria-label={`Remove ${l.label}`}
-              onClick={() =>
-                void updateItem(linksItem, (prev) => removeLink(prev, l.url))
-              }
+        {links.map((l) => {
+          const editing = editUrl === l.url;
+          return (
+            <li
+              key={l.id}
+              className={`link-item${overUrl === l.url ? ' link-over' : ''}${editing ? ' link-editing' : ''}`}
+              draggable={!editing}
+              onDragStart={(e) => {
+                setDragUrl(l.url);
+                e.dataTransfer.effectAllowed = 'move';
+                try {
+                  e.dataTransfer.setData('text/plain', l.url);
+                } catch {
+                  /* some embedders refuse setData — the local state carries it */
+                }
+              }}
+              onDragOver={(e) => {
+                if (dragUrl === null) return;
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                setOverUrl(l.url);
+              }}
+              onDragLeave={() => setOverUrl((cur) => (cur === l.url ? null : cur))}
+              onDrop={(e) => {
+                e.preventDefault();
+                if (dragUrl && dragUrl !== l.url) {
+                  void updateItem(linksItem, (prev) => reorderLinks(prev, dragUrl, l.url));
+                }
+                setDragUrl(null);
+                setOverUrl(null);
+              }}
+              onDragEnd={() => {
+                setDragUrl(null);
+                setOverUrl(null);
+              }}
             >
-              ✕
-            </button>
-          </li>
-        ))}
+              {editing ? (
+                <input
+                  className="widget-input link-edit"
+                  type="text"
+                  aria-label={`Rename ${l.label}`}
+                  autoComplete="off"
+                  autoFocus
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') commitRename(l.url);
+                    else if (e.key === 'Escape') setEditUrl(null);
+                  }}
+                  onBlur={() => setEditUrl(null)}
+                />
+              ) : (
+                <>
+                  <a href={l.url} target="_blank" rel="noreferrer" draggable={false}>
+                    {tileIcon(l)}
+                    <span className="link-label">{l.label}</span>
+                  </a>
+                  <button
+                    type="button"
+                    className="row-rename"
+                    aria-label={`Rename ${l.label}`}
+                    onClick={() => {
+                      setDraft(l.label);
+                      setEditUrl(l.url);
+                    }}
+                  >
+                    ✎
+                  </button>
+                  <button
+                    type="button"
+                    className="row-remove"
+                    aria-label={`Remove ${l.label}`}
+                    onClick={() =>
+                      void updateItem(linksItem, (prev) => removeLink(prev, l.url))
+                    }
+                  >
+                    ✕
+                  </button>
+                </>
+              )}
+            </li>
+          );
+        })}
         <li className="links-add">
           {open ? (
             <form className="links-form" onSubmit={submit}>

@@ -13,7 +13,9 @@ import { Quote } from './widgets/quotes/Quote';
 import { Stats } from './widgets/stats/Stats';
 import { Drawer } from './widgets/settings/Drawer';
 import { Palette, type PaletteCommand } from './widgets/palette/Palette';
-import { useSettings, setSoundPower, settingsItem, setSettingsAccent } from './state/settings';
+import { useSettings, setSoundPower, setStatsVisible, setLinkIcons, settingsItem, setSettingsAccent } from './state/settings';
+import { ensureIconsPermission, type PermissionsSeam } from './widgets/links/icons';
+import { browser } from 'wxt/browser';
 import { applyPresetRoom } from './widgets/settings/presetApply';
 import { filmItem, setFilmMotion } from './story/item';
 import { useDailyTick } from './state/useDailyTick';
@@ -101,6 +103,21 @@ export default function App() {
       label: settings.sound.enabled ? 'sound off' : 'sound on',
       run: () => void setSoundPower(settingsItem, !settings.sound.enabled),
     },
+    {
+      id: 'stats',
+      label: settings.statsVisible ? 'tab stats: hide' : 'tab stats: show',
+      run: () => void setStatsVisible(settingsItem, !settings.statsVisible),
+    },
+    {
+      id: 'link-icons',
+      label: settings.linkIcons ? 'shortcut icons: off' : 'shortcut icons: on',
+      run: async () => {
+        const on = !settings.linkIcons;
+        // same door the drawer opens: no grant, no write, no crumb
+        if (on && !(await ensureIconsPermission(browser.permissions as unknown as PermissionsSeam))) return;
+        void setLinkIcons(settingsItem, on);
+      },
+    },
     ...ACCENT_KEYS.map((accent) => ({
       id: `accent-${accent}`,
       label: `accent: ${accent}`,
@@ -138,9 +155,11 @@ export default function App() {
           <div className="arrive a3 main-quote">
             <Quote />
           </div>
-          <div className="arrive a3b main-stats">
-            <Stats />
-          </div>
+          {settings.statsVisible ? (
+            <div className="arrive a3b main-stats">
+              <Stats />
+            </div>
+          ) : null}
         </div>
         <aside className="col-side">
           <div className="arrive a2a">

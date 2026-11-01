@@ -396,8 +396,6 @@
 
 .todo-row { padding-right: 24px; }
 
-.link-item { padding-right: 20px; }
-
 .todo-row:hover .row-remove,
 .link-item:hover .row-remove,
 .row-remove:focus-visible {
@@ -434,6 +432,85 @@
   gap: 6px;
 }
 
+.link-item { padding-right: 44px; }
+
+.link-item > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  letter-spacing: 0.01em;
+  color: var(--ink-2);
+  padding-block: 6px;
+  position: relative;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.link-icon,
+.link-glyph {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  background: var(--canvas);
+  flex: none;
+}
+
+.link-icon {
+  filter: grayscale(1) brightness(1.08);
+}
+
+.link-icon[hidden] {
+  display: none;
+}
+
+.link-glyph {
+  font-size: 9px;
+  line-height: 14px;
+  text-align: center;
+  color: var(--muted);
+}
+
+/* the second quiet hover button: rename */
+.row-rename {
+  position: absolute;
+  right: 17px;
+  top: 50%;
+  translate: 0 -50%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 11px;
+  opacity: 0;
+  padding: 6px 5px;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+
+.link-item:hover .row-rename,
+.row-rename:focus-visible,
+.link-item:hover .row-remove,
+.link-item:hover .row-remove:focus-visible {
+  opacity: 0.7;
+}
+
+.link-item:hover .row-rename:hover,
+.row-rename:focus-visible,
+.link-item:hover .row-remove:hover,
+.link-item:hover .row-remove:focus-visible {
+  opacity: 1;
+}
+
+.row-rename:hover,
+.row-rename:focus-visible,
+.row-remove:hover,
+.row-remove:focus-visible {
+  color: var(--ink);
+}
+
+.link-edit {
+  width: 132px;
+}
+
 /* the row drags: the label lifts quietly, the landing target speaks */
 .link-item[draggable='true'] {
   cursor: grab;
@@ -449,15 +526,6 @@
 
 .link-item.link-over > a::after {
   right: 0;
-}
-
-.link-item > a {
-  font-size: 13px;
-  letter-spacing: 0.01em;
-  color: var(--ink-2);
-  padding-block: 6px;
-  position: relative;
-  transition: color var(--dur-fast) var(--ease-out);
 }
 
 .link-item > a::after {
@@ -926,6 +994,24 @@
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+/* the surface toggles: one switch, one whispered line, stacked */
+.drawer-switches {
+  display: grid;
+  gap: 10px;
+}
+
+.drawer-switch-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.drawer-tiny {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.02em;
 }
 
 .drawer-range {

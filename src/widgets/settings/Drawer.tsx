@@ -1,14 +1,18 @@
 import { useEffect, useState, type FormEvent } from 'react';
+import { browser } from 'wxt/browser';
 import {
   exportItem,
   importItem,
+  setLinkIcons,
   setSettingsAccent,
   setSettingsName,
   setSoundPower,
   setSoundVolume,
+  setStatsVisible,
   settingsItem,
   useSettings,
 } from '../../state/settings';
+import { ensureIconsPermission, type PermissionsSeam } from '../links/icons';
 import { type PresetId } from '../../state/presets';
 import { applyPresetRoom } from './presetApply';
 import { filmItem, setFilmMotion, useFilm } from '../../story/item';
@@ -85,6 +89,19 @@ export function Drawer({
 
   // a preset is two honest writes: the room's settings and its bed
   const applyPreset = (id: PresetId) => applyPresetRoom(id);
+
+  // icons: off is a plain write; on must pass the optional permission door
+  // first, and a declined ask leaves the switch off — no half states
+  const toggleIcons = async () => {
+    const on = !settings.linkIcons;
+    if (on) {
+      const granted = await ensureIconsPermission(
+        browser.permissions as unknown as PermissionsSeam,
+      );
+      if (!granted) return;
+    }
+    void setLinkIcons(settingsItem, on);
+  };
 
   const applyImport = async () => {
     try {
@@ -197,6 +214,40 @@ export function Drawer({
                   {m.label}
                 </button>
               ))}
+            </div>
+          </div>
+
+          <div className="drawer-row" role="group" aria-labelledby="drawer-surface">
+            <span className="drawer-label" id="drawer-surface">
+              Surface
+            </span>
+            <div className="drawer-switches">
+              <div className="drawer-switch-row">
+                <button
+                  type="button"
+                  className="sound-switch"
+                  role="switch"
+                  aria-checked={settings.statsVisible}
+                  aria-label="Tab stats"
+                  onClick={() => void setStatsVisible(settingsItem, !settings.statsVisible)}
+                >
+                  <span className="sound-knob" aria-hidden="true" />
+                </button>
+                <span className="drawer-tiny">tab stats — the strip under the quote</span>
+              </div>
+              <div className="drawer-switch-row">
+                <button
+                  type="button"
+                  className="sound-switch"
+                  role="switch"
+                  aria-checked={settings.linkIcons}
+                  aria-label="Shortcut icons"
+                  onClick={() => void toggleIcons()}
+                >
+                  <span className="sound-knob" aria-hidden="true" />
+                </button>
+                <span className="drawer-tiny">shortcut icons — inked black &amp; white</span>
+              </div>
             </div>
           </div>
 

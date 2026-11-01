@@ -30,6 +30,13 @@ export function removeLink(links: LinkItem[], url: string): LinkItem[] {
   return links.filter((l) => l.url !== url);
 }
 
+/** Relabel one tile: trimmed, blank refused, ids stay anchors. */
+export function renameLink(links: LinkItem[], url: string, label: string): LinkItem[] {
+  const clean = label.trim();
+  if (!clean || !links.some((l) => l.url === url)) return links;
+  return links.map((l) => (l.url === url ? { ...l, label: clean } : l));
+}
+
 /** The dragged link takes the target's exact slot; anything else is a no-op. */
 export function reorderLinks(
   links: LinkItem[],
