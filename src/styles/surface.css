@@ -412,6 +412,112 @@
   color: var(--ink);
 }
 
+/* ————— The first shadow ————— */
+
+.tour-hole {
+  position: fixed;
+  z-index: 32;
+  border-radius: 12px;
+  box-shadow: 0 0 0 200vmax rgba(4, 5, 7, 0.88);
+  pointer-events: none;
+  transition:
+    top var(--dur) var(--ease-out),
+    left var(--dur) var(--ease-out),
+    width var(--dur) var(--ease-out),
+    height var(--dur) var(--ease-out);
+}
+
+/* a targetless stop spotlights nothing: the stage drowns evenly */
+.tour-veil {
+  position: fixed;
+  inset: 0;
+  z-index: 32;
+  background: rgba(4, 5, 7, 0.88);
+  pointer-events: none;
+}
+
+.tour-card {
+  position: fixed;
+  z-index: 33;
+  left: 50%;
+  bottom: 96px;
+  translate: -50% 0;
+  width: min(380px, calc(100vw - 48px));
+  background: var(--canvas);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  padding: 20px 22px 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.tour-title {
+  font-family: var(--font-display);
+  font-size: 19px;
+  letter-spacing: 0.01em;
+  color: var(--ink);
+}
+
+.tour-line {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.tour-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 2px;
+}
+
+.tour-dots {
+  display: flex;
+  gap: 5px;
+}
+
+.tour-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--hairline-strong);
+  transition: background var(--dur-fast) var(--ease-out);
+}
+
+.tour-dot-on {
+  background: var(--pulse);
+}
+
+.tour-clock {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.tour-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tour-skip {
+  color: var(--muted);
+}
+
+/* the stage's other summons claim the screen; the shadow waits behind */
+.tour {
+  transition: opacity var(--dur) var(--ease-out);
+}
+
+.tour-paused {
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--dur) var(--ease-out),
+    visibility 0s var(--dur);
+}
+
 /* ————— Links row ————— */
 
 .links-row {

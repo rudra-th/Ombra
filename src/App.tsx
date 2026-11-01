@@ -1,5 +1,4 @@
-import { lazy, Suspense, useEffect, useRef, useState } from 'react';
-import { Clock } from './widgets/time/Clock';
+import { lazy, Suspense, useEffect, useRef, useState } from 'react';import { Clock } from './widgets/time/Clock';
 import { Search } from './widgets/search/Search';
 import { Intention } from './widgets/intention/Intention';
 import { Todos } from './widgets/todos/Todos';
@@ -16,6 +15,8 @@ import { Palette, type PaletteCommand } from './widgets/palette/Palette';
 import { useSettings, setSoundPower, setStatsVisible, setLinkIcons, settingsItem, setSettingsAccent } from './state/settings';
 import { ensureIconsPermission, type PermissionsSeam } from './widgets/links/icons';
 import { browser } from 'wxt/browser';
+import { markGuided, tourItem, useTourSeen } from './widgets/guide/item';
+import { TOUR_STEPS } from './widgets/guide/steps';
 import { applyPresetRoom } from './widgets/settings/presetApply';
 import { filmItem, setFilmMotion } from './story/item';
 import { useDailyTick } from './state/useDailyTick';
@@ -23,6 +24,9 @@ import { getSoundEngine } from './audio/bridge';
 
 /** The film is summoned, never in the initial paint — its chunk stays asleep. */
 const Story = lazy(() => import('./story/Story').then((m) => ({ default: m.Story })));
+
+/** The first shadow is the same: summoned, or first-run — never initial paint. */
+const Guide = lazy(() => import('./widgets/guide/Tour').then((m) => ({ default: m.Tour })));
 
 const ACCENT_KEYS = ['ember', 'sage', 'fog'] as const;
 
@@ -33,21 +37,25 @@ export default function App() {
   const [filmOpen, setFilmOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [tourOpen, setTourOpen] = useState(false);
   const [zen, setZen] = useState(false);
+  const guided = useTourSeen();
   const lastEsc = useRef(0); // double-Esc is pure zen's summon, within a breath
-  const overlays = useRef({ film: false, palette: false, drawer: false });
-  overlays.current = { film: filmOpen, palette: paletteOpen, drawer: settingsOpen };
+  const overlays = useRef({ film: false, palette: false, drawer: false, tour: false });
+  overlays.current = { film: filmOpen, palette: paletteOpen, drawer: settingsOpen, tour: tourOpen };
   const typing = () =>
     document.activeElement instanceof HTMLElement &&
     (document.activeElement.matches('input, textarea') || document.activeElement.isContentEditable);
 
   // Summon keys: Esc cuts film, double-Esc hides the day, Ctrl+Shift+P asks,
-  // Shift+S negotiates with the film, at any hour
+  // Shift+S negotiates with the film, at any hour. The shadow owns Esc while
+  // it walks — a summon buries it rather than stacking behind it.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const o = overlays.current;
       if (e.key === 'Escape') {
         if (o.film) setFilmOpen(false); // the film's exit never feeds a zen pair
+        else if (o.tour) return; // the shadow takes its own Esc inside
         else if (o.palette || o.drawer) lastEsc.current = 0; // those own their Esc
         else {
           const now = Date.now();
@@ -61,6 +69,7 @@ export default function App() {
         return;
       }
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'p' || e.key === 'P') && !typing()) {
+        if (o.tour) setTourOpen(false); // the palette asks above the shadow
         setPaletteOpen((v) => !v);
       } else if ((e.key === 's' || e.key === 'S') && e.shiftKey && !typing()) {
         setFilmOpen((open) => !open);
@@ -76,6 +85,23 @@ export default function App() {
     engine.arm();
     engine.setPower(settings.sound.enabled, settings.sound.volume);
   }, [settings.sound.enabled, settings.sound.volume]);
+
+  // The shadow asks once: after the arrivals have landed, only on a stage
+  // the user hasn't already started using — and only on a first device.
+  useEffect(() => {
+    if (guided) return;
+    const t = window.setTimeout(() => {
+      const o = overlays.current;
+      if (o.film || o.palette || o.drawer) return; // busy — stay unseen, unguided
+      setTourOpen(true);
+    }, 2400);
+    return () => window.clearTimeout(t);
+  }, [guided]);
+
+  const finishTour = () => {
+    setTourOpen(false);
+    void markGuided(tourItem);
+  };
 
   // The palette's vocabulary: everything its commands own is already here.
   const commands: PaletteCommand[] = [
@@ -118,6 +144,14 @@ export default function App() {
         void setLinkIcons(settingsItem, on);
       },
     },
+    {
+      id: 'tour',
+      label: guided ? 'replay the first shadow' : 'the first shadow — a quiet tour',
+      run: () => {
+        setPaletteOpen(false);
+        setTourOpen(true);
+      },
+    },
     ...ACCENT_KEYS.map((accent) => ({
       id: `accent-${accent}`,
       label: `accent: ${accent}`,
@@ -146,13 +180,13 @@ export default function App() {
       {/* the film takes the screen; the surface goes dark-behind and silent to keys */}
       <main className={`surface${zen ? ' surface--zen' : ''}`} inert={filmOpen}>
         <div className="col-main">
-          <div className="arrive a0">
+          <div className="arrive a0" data-tour="clock">
             <Clock name={settings.name} />
           </div>
-          <div className="arrive a1 main-search">
+          <div className="arrive a1 main-search" data-tour="search">
             <Search />
           </div>
-          <div className="arrive a3 main-quote">
+          <div className="arrive a3 main-quote" data-tour="quote">
             <Quote />
           </div>
           {settings.statsVisible ? (
@@ -161,7 +195,7 @@ export default function App() {
             </div>
           ) : null}
         </div>
-        <aside className="col-side">
+        <aside className="col-side" data-tour="side">
           <div className="arrive a2a">
             <Intention />
           </div>
@@ -184,7 +218,7 @@ export default function App() {
             <Focus />
           </div>
         </aside>
-        <div className="arrive a4 surface-links">
+        <div className="arrive a4 surface-links" data-tour="links">
           <Links />
         </div>
       </main>
@@ -199,6 +233,15 @@ export default function App() {
       {filmOpen ? (
         <Suspense fallback={null}>
           <Story soundEnabled={settings.sound.enabled} onExit={() => setFilmOpen(false)} />
+        </Suspense>
+      ) : null}
+      {tourOpen ? (
+        <Suspense fallback={null}>
+          <Guide
+            steps={TOUR_STEPS}
+            paused={filmOpen || paletteOpen || settingsOpen}
+            onDone={finishTour}
+          />
         </Suspense>
       ) : null}
     </div>
