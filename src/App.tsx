@@ -11,6 +11,7 @@ import { Focus } from './widgets/focus/Focus';
 import { Links } from './widgets/links/Links';
 import { Quote } from './widgets/quotes/Quote';
 import { Stats } from './widgets/stats/Stats';
+import { SettingsDrawer } from './widgets/settings/Drawer';
 import { useSettings } from './state/settings';
 import { useDailyTick } from './state/useDailyTick';
 import { getSoundEngine } from './audio/bridge';
@@ -92,6 +93,7 @@ export default function App() {
           <Links />
         </div>
       </main>
+      <SettingsDrawer />
       {filmOpen ? (
         <Suspense fallback={null}>
           <Story soundEnabled={settings.sound.enabled} onExit={() => setFilmOpen(false)} />

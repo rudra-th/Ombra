@@ -4,8 +4,7 @@ import {
   DEFAULT_SETTINGS,
   migrateSettings,
   type Settings,
-} from './schema';
-import { useStorageValue } from './useStorageValue';
+} from './schema';import { useStorageValue } from './useStorageValue';
 
 export const settingsItem = storage.defineItem<Settings>('sync:settings', {
   fallback: DEFAULT_SETTINGS,
@@ -50,4 +49,33 @@ export function setSoundVolume(item: SettingsSeam, volume: number): Promise<void
     ...prev,
     sound: { ...prev.sound, volume },
   }));
+}
+
+/** Name write — the greeting's only source; trimmed like the schema does. */
+export function setSettingsName(item: SettingsSeam, name: string): Promise<void> {
+  return updateSettings(item, (prev) => ({ ...prev, name: name.trim() }));
+}
+
+/** Accent write — the drawer's swatch chips; choices are type-policed. */
+export function setSettingsAccent(
+  item: SettingsSeam,
+  accent: 'ember' | 'sage' | 'fog',
+): Promise<void> {
+  return updateSettings(item, (prev) => ({ ...prev, accent }));
+}
+
+/** The bytes as they would be stored: readable JSON for the drawer's export. */
+export async function exportItem(item: SettingsSeam): Promise<string> {
+  const settings = migrateSettings(await item.getValue());
+  return JSON.stringify(settings, null, 2);
+}
+
+/**
+ * Import is a read of untrusted text through the schema's door: whatever
+ * comes in is migrated before it is stored, junk collapses to defaults,
+ * and text that isn't JSON at all throws before anything is written.
+ */
+export async function importItem(item: SettingsSeam, text: string): Promise<void> {
+  const parsed: unknown = JSON.parse(text);
+  await item.setValue(migrateSettings(parsed));
 }

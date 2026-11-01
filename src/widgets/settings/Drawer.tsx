@@ -1,0 +1,218 @@
+import { useEffect, useState, type FormEvent } from 'react';
+import {
+  exportItem,
+  importItem,
+  setSettingsAccent,
+  setSettingsName,
+  setSoundPower,
+  setSoundVolume,
+  settingsItem,
+  useSettings,
+} from '../../state/settings';
+import { filmItem, setFilmMotion, useFilm } from '../../story/item';
+
+const ACCENTS = [
+  { key: 'ember', label: 'ember' },
+  { key: 'sage', label: 'sage' },
+  { key: 'fog', label: 'fog' },
+] as const;
+
+type AccentKey = (typeof ACCENTS)[number]['key'];
+
+const MOTIONS = [
+  { key: 'cinema', label: 'cinema' },
+  { key: 'static', label: 'stills' },
+] as const;
+
+/**
+ * The settings drawer: every control it owns writes through the settings
+ * seam, so the surface behind it previews the change as it is typed.
+ */
+export function SettingsDrawer() {
+  const settings = useSettings();
+  const film = useFilm();
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState(settings.name);
+  const [importText, setImportText] = useState('');
+  const [importErr, setImportErr] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  // the drawer owns its Esc; the field's Esc closes it too
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open]);
+
+  // freshly opened drawer always shows the current name
+  useEffect(() => {
+    if (open) setName(settings.name);
+  }, [open, settings.name]);
+
+  const toggleOpen = () => setOpen((v) => !v);
+
+  const applyName = (e: FormEvent) => {
+    e.preventDefault();
+    if (name.trim() !== settings.name) void setSettingsName(settingsItem, name);
+  };
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(await exportItem(settingsItem));
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1600);
+    } catch {
+      setCopied(false);
+    }
+  };
+
+  const applyImport = async () => {
+    try {
+      await importItem(settingsItem, importText);
+      setImportErr(false);
+      setImportText('');
+    } catch {
+      setImportErr(true);
+    }
+  };
+
+  return (
+    <>
+      <button
+        type="button"
+        className="settings-gear"
+        aria-expanded={open}
+        onClick={toggleOpen}
+      >
+        settings
+      </button>
+      {open ? (
+        <div className="drawer" role="dialog" aria-label="Settings">
+          <div className="drawer-head">
+            <p className="widget-label">Settings</p>
+            <button
+              type="button"
+              className="drawer-close"
+              onClick={() => setOpen(false)}
+            >
+              close
+            </button>
+          </div>
+
+          <form className="drawer-row" onSubmit={applyName}>
+            <label className="drawer-label" htmlFor="drawer-name">
+              Name
+            </label>
+            <input
+              id="drawer-name"
+              className="widget-input"
+              type="text"
+              autoComplete="off"
+              placeholder="who greets you"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </form>
+
+          <div className="drawer-row" role="radiogroup" aria-label="Accent">
+            <span className="drawer-label">Accent</span>
+            <div className="drawer-chips">
+              {ACCENTS.map((a) => (
+                <button
+                  key={a.key}
+                  type="button"
+                  role="radio"
+                  aria-checked={settings.accent === a.key}
+                  className={`drawer-chip${settings.accent === a.key ? ' drawer-chip-on' : ''}`}
+                  onClick={() => void setSettingsAccent(settingsItem, a.key as AccentKey)}
+                >
+                  <span className={`drawer-swatch drawer-swatch-${a.key}`} />
+                  {a.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="drawer-row">
+            <label className="drawer-label" htmlFor="drawer-vol">
+              Master volume
+            </label>
+            <div className="drawer-inline">
+              <button
+                type="button"
+                className="sound-switch"
+                role="switch"
+                aria-checked={settings.sound.enabled}
+                aria-label="Sound"
+                onClick={() => void setSoundPower(settingsItem, !settings.sound.enabled)}
+              >
+                <span className="sound-knob" aria-hidden="true" />
+              </button>
+              <input
+                id="drawer-vol"
+                className="drawer-range"
+                type="range"
+                min="0"
+                max="1"
+                step="0.05"
+                value={settings.sound.volume}
+                onChange={(e) => void setSoundVolume(settingsItem, Number(e.target.value))}
+                aria-label="Master volume"
+              />
+            </div>
+          </div>
+
+          <div className="drawer-row" role="radiogroup" aria-label="Film motion">
+            <span className="drawer-label">Film</span>
+            <div className="drawer-chips">
+              {MOTIONS.map((m) => (
+                <button
+                  key={m.key}
+                  type="button"
+                  role="radio"
+                  aria-checked={film.motion === m.key}
+                  className={`drawer-chip${film.motion === m.key ? ' drawer-chip-on' : ''}`}
+                  onClick={() => void setFilmMotion(filmItem, m.key)}
+                >
+                  {m.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="drawer-row">
+            <span className="drawer-label">Your data</span>
+            <div className="drawer-io">
+              <button type="button" className="widget-trigger" onClick={() => void copy()}>
+                {copied ? 'copied to clipboard' : 'copy settings JSON'}
+              </button>
+              <textarea
+                className="drawer-import"
+                placeholder="paste settings JSON, then apply"
+                aria-label="Import settings JSON"
+                value={importText}
+                onChange={(e) => {
+                  setImportText(e.target.value);
+                  setImportErr(false);
+                }}
+                rows={4}
+              />
+              <button
+                type="button"
+                className="widget-trigger"
+                onClick={() => void applyImport()}
+                disabled={!importText.trim()}
+              >
+                apply import
+              </button>
+              {importErr ? <p className="drawer-err">that did not read as JSON</p> : null}
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </>
+  );
+}
