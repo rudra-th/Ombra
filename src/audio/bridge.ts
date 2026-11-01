@@ -2,6 +2,7 @@ import { createSoundEngine, type SoundEngine } from './engine';
 import { createAmbiencePlayer } from './player';
 import type { AmbienceAudio } from './player';
 import type { RecipeCtx } from './recipes';
+import { type DeckArm } from './deckSounds';
 import type { AudioParamLike, BufferLike, GainLike } from './engine';
 
 let engine: SoundEngine | null = null;
@@ -35,6 +36,16 @@ export function getSoundEngine(): SoundEngine {
 export function getSoundPlayer(): ReturnType<typeof createAmbiencePlayer> {
   player ??= createAmbiencePlayer(() => ambienceAudio());
   return player;
+}
+
+/** The deck's arm: the real context and the master bus, or null when asleep. */
+export function deckArm(): DeckArm | null {
+  const live = getSoundEngine();
+  // the page's context is the real thing: full Web Audio beneath CtxLike
+  const ctx = live.context() as unknown as RecipeCtx | null;
+  const master = live.bus();
+  // deck recipes are tones: they need the clock and the bus, nothing else
+  return ctx && master ? { ctx, bus: master.masterGain } : null;
 }
 
 function ambienceAudio(): AmbienceAudio | null {

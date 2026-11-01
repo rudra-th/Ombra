@@ -2,7 +2,9 @@ import { useSettings, setSoundPower, setSoundVolume, settingsItem } from '../../
 import { updateItem } from '../../state/useStorageValue';
 import { ambienceItem, useAmbience } from './item';
 import { BEDS, levelFor, setBed, setLevel, type BedId } from '../../audio/beds';
-import { getSoundPlayer } from '../../audio/bridge';
+import { deckArm, getSoundPlayer } from '../../audio/bridge';
+import { playDeck } from '../../audio/deckSounds';
+import { hoverTick, softClick } from '../../audio/recipes';
 import { useEffect } from 'react';
 
 const BEDS_GUI: BedId[] = ['rain', 'brown', 'pink', 'fire', 'cafe', 'ocean', 'forest', 'wind', 'birds'];
@@ -27,11 +29,19 @@ export function Sound() {
     player.play(ambience.bed, levelFor(ambience, ambience.bed));
   }, [settings.sound.enabled, ambience]);
 
+  // the deck's touch sounds: hover tick on the chips, soft click on
+  // presses — armed only while the room is on, silent unless the page's
+  // engine is awake (hover is not a gesture)
+  const deckVoice = (recipe: () => ReturnType<typeof hoverTick>) =>
+    playDeck(settings.sound.enabled ? deckArm() : null, recipe);
+
   const togglePower = () => {
+    deckVoice(softClick);
     void setSoundPower(settingsItem, !settings.sound.enabled);
   };
 
   const pickBed = (bed: BedId) => {
+    deckVoice(softClick);
     void updateItem(ambienceItem, (prev) =>
       setBed(prev, prev.bed === bed ? null : bed),
     );
@@ -75,6 +85,7 @@ export function Sound() {
                 role="radio"
                 aria-checked={ambience.bed === bed}
                 className={`sound-bed${ambience.bed === bed ? ' sound-bed-active' : ''}`}
+                onPointerEnter={() => deckVoice(hoverTick)}
                 onClick={() => pickBed(bed)}
               >
                 {BED_LABELS[bed]}
