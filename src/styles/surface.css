@@ -723,7 +723,7 @@
   transition: translate var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out);
 }
 
-.sound-on .sound-knob {
+.sound-switch[aria-checked='true'] .sound-knob {
   translate: 16px 0;
   background: var(--pulse);
 }

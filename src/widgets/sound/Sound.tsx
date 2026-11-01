@@ -66,7 +66,7 @@ export function Sound() {
         Ambience
         <button
           type="button"
-          className={`sound-switch${settings.sound.enabled ? ' sound-on' : ''}`}
+          className="sound-switch"
           role="switch"
           aria-checked={settings.sound.enabled}
           aria-label={settings.sound.enabled ? 'Sound on' : 'Sound off'}

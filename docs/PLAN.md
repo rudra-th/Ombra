@@ -225,6 +225,13 @@ week. mv3: alarms ≥ 0.5min (Chrome 120), ≤ 500 total.
   join a per-item queue (`enqueueWrite`) — each write starts only after the
   previous has fully landed, and a failed write never deadheads the chain
   (tests: the three-bump counter lands at 3, not 1).
+- **The knob read a deck-only class.** The switch pill's knob traveled only
+  under an ancestor `.sound-on` class — the deck supplied it, so the drawer's
+  three `role="switch"` buttons declared `aria-checked` truthfully while
+  their knobs sat frozen left (the visual pass caught the Surface switches
+  contradicting the armed state behind them). The knob now travels on
+  `[aria-checked='true']`, one source of truth for pointer and screen reader;
+  the deck's redundant class composition is gone.
 - **Preview letter-tiles become the real demo trail.** The shim's
   `permissions` reports granted while `runtime.getURL` is absent, so the
   preview exercises exactly "granted, always glyph" — the true-favicon path
