@@ -7,14 +7,12 @@ import {
   setSoundPower,
   setSoundVolume,
   settingsItem,
-  updateSettings,
   useSettings,
 } from '../../state/settings';
-import { presetAmbience, presetSettings, type PresetId } from '../../state/presets';
-import { setBed, setLevel } from '../../audio/beds';
-import { ambienceItem } from '../sound/item';
-import { updateItem } from '../../state/useStorageValue';
+import { type PresetId } from '../../state/presets';
+import { applyPresetRoom } from './presetApply';
 import { filmItem, setFilmMotion, useFilm } from '../../story/item';
+import { updateItem } from '../../state/useStorageValue';
 
 const ACCENTS = [
   { key: 'ember', label: 'ember' },
@@ -39,11 +37,18 @@ const MOTIONS = [
  * The settings drawer: every control it owns writes through the settings
  * seam, so the surface behind it previews the change as it is typed.
  */
-export function SettingsDrawer() {
+export function Drawer({
+  open,
+  onToggle,
+  onClose,
+}: {
+  open: boolean;
+  onToggle: () => void;
+  onClose: () => void;
+}) {
   const settings = useSettings();
   const film = useFilm();
-  const [open, setOpen] = useState(false);
-  const [name, setName] = useState(settings.name);
+  const [name, setName] = useState<string>('');
   const [importText, setImportText] = useState('');
   const [importErr, setImportErr] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -52,18 +57,16 @@ export function SettingsDrawer() {
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setOpen(false);
+      if (e.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [open]);
+  }, [open, onClose]);
 
   // freshly opened drawer always shows the current name
   useEffect(() => {
     if (open) setName(settings.name);
   }, [open, settings.name]);
-
-  const toggleOpen = () => setOpen((v) => !v);
 
   const applyName = (e: FormEvent) => {
     e.preventDefault();
@@ -81,11 +84,7 @@ export function SettingsDrawer() {
   };
 
   // a preset is two honest writes: the room's settings and its bed
-  const applyPreset = (id: PresetId) => {
-    void updateSettings(settingsItem, (prev) => ({ ...prev, ...presetSettings(id) }));
-    const { bed, level } = presetAmbience(id);
-    void updateItem(ambienceItem, (prev) => setLevel(setBed(prev, bed), bed, level));
-  };
+  const applyPreset = (id: PresetId) => applyPresetRoom(id);
 
   const applyImport = async () => {
     try {
@@ -103,7 +102,7 @@ export function SettingsDrawer() {
         type="button"
         className="settings-gear"
         aria-expanded={open}
-        onClick={toggleOpen}
+        onClick={onToggle}
       >
         settings
       </button>
@@ -114,7 +113,7 @@ export function SettingsDrawer() {
             <button
               type="button"
               className="drawer-close"
-              onClick={() => setOpen(false)}
+              onClick={onClose}
             >
               close
             </button>

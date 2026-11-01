@@ -52,7 +52,9 @@
 /* ————— Arrivals: each block lands 80–110 ms after the last ————— */
 
 .arrive {
-  animation: arrive 700ms var(--ease-out) both;
+  /* backwards keeps the landing hidden through its delay and hands the
+     element back to the cascade at the end — so zen can fade it later */
+  animation: arrive 700ms var(--ease-out) backwards;
 }
 
 .a0  { animation-delay: 0ms; }
@@ -968,6 +970,105 @@
 .drawer-err {
   font-size: 12px;
   color: var(--muted);
+}
+
+/* ————— Command palette ————— */
+
+.palette {
+  position: fixed;
+  top: 16vh;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  width: min(460px, 90vw);
+  background: var(--panel);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius);
+  padding: 14px 16px 12px;
+  display: grid;
+  gap: 12px;
+  animation: palette-in var(--dur) var(--ease-out) both;
+}
+
+@keyframes palette-in {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+.palette-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.palette-item {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-size: 13px;
+  color: var(--ink-2);
+  padding: 8px 10px;
+  border-radius: var(--radius);
+  transition: background var(--dur-fast) var(--ease-out);
+}
+
+.palette-item[data-sel] {
+  background: var(--elevated);
+  color: var(--ink);
+}
+
+.palette-hint {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+}
+
+.palette-empty {
+  font-size: 12px;
+  color: var(--muted);
+  padding: 8px 10px;
+}
+
+.palette-edge {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  opacity: 0.75;
+}
+
+/* ————— Pure zen ————— */
+
+.stage[data-zen] .main-quote,
+.stage[data-zen] .main-stats,
+.stage[data-zen] .col-side,
+.stage[data-zen] .surface-links {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity var(--dur) var(--ease-out),
+    visibility 0s var(--dur);
+}
+
+.main-quote,
+.main-stats,
+.col-side,
+.surface-links {
+  transition: opacity var(--dur) var(--ease-out), visibility 0s 0s;
 }
 
 /* ————— Grace for small windows ————— */
