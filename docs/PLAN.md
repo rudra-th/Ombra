@@ -143,7 +143,10 @@ week. mv3: alarms ≥ 0.5min (Chrome 120), ≤ 500 total.
    defaults, migrated blobs inherit the default), inline tile rename, inked
    B&W favicons behind an opt-in permission ask, drawer Surface section,
    palette commands, threaded write queue. Deferrals → honesty notes below.
-5. **First Shadow** — driver.js guide, hints, replay.
+5. **First Shadow** ✅ a hand-rolled spotlight tour: first-run once, six
+   stops (clock, search, quote, side tools, links row, the three summoned
+   darks), Esc/arrow keys, film-and-palette pause-resume, palette replay,
+   per-device remembering. Deferrals → honesty notes below.
 6. **Launch** — icon/logo, screenshots + story GIF, listing copy, privacy
    disclosures, v1.0.0, store submission.
 
@@ -191,6 +194,37 @@ week. mv3: alarms ≥ 0.5min (Chrome 120), ≤ 500 total.
   import textarea, stacked quiet actions instead of scattered boxes), and
   pure zen extended to hide the settings gear — a pure stage now holds only
   greeting, clock, and search.
+
+## Phase 5 honesty notes (v0.7-shadow)
+
+- **Not driver.js.** The outline said "driver.js guide": the shipped answer is
+  a hand-rolled spotlight (~200 lines). driver.js's machinery is mostly
+  scroll-into-view and edge flipping — dead weight on a fixed dashboard stage
+  that never scrolls the page, and its steps-of-flow shapes don't want our
+  ink. Steps are a small data file; skip rule, spotlight rect, and keyboard
+  walk are ours.
+- **No hint dots — rejected, not deferred.** driver.js-style persistent
+  pulsing dots are exactly the ambient aggression the surface refuses; the
+  widget labels are already self-describing, so the tour exists to name the
+  invisible (summons, the gear) and the grammar. Nothing pulses after.
+- **Targetless stops don't fake a spotlight.** The finale has no target; the
+  first attempt floated a synthetic hole over nothing — it read as a bug, so
+  a targetless stop drowns the whole stage evenly and lets the card speak
+  (the pause-vs-spotlight contrast is the point).
+- **The remembering is per device.** `local:guided`, not `sync:` — a synced
+  settings account still gets offered the shadow once on a fresh machine,
+  which is the intended "fresh install" behavior, and the export/import file
+  stays pure preferences (tour state never pollutes the JSON).
+- **The shadow yields.** It arms 2.4s after first paint (arrivals landed)
+  but abandons silently if film/palette/drawer are already open at that
+  moment — unseen, unguided, re-offered next tab. While walking, it pauses
+  fully behind the film (Shift+S scares even the shadow) and behind the
+  palette; its keys sleep while paused; Esc in the film cuts the film first.
+  Ctrl+Shift+P during a walk buries the shadow instead of stacking under it
+  (its z-index would otherwise swallow the palette).
+- **Skip and finish are the same write.** Esc, "skip the shadow", and
+  "walk into the dark" all mark guided — the tour narrates once per device,
+  then only the palette remembers how to reopen it.
 
 ## Phase 4b honesty notes (v0.6-tiles)
 
