@@ -629,12 +629,13 @@
 
 .sound-switch {
   float: right;
-  background: none;
+  appearance: none;
+  background: var(--canvas);
   border: 1px solid var(--hairline-strong);
-  border-radius: var(--radius-round);
-  width: 30px;
-  height: 16px;
-  padding: 1px;
+  border-radius: 999px;
+  width: 34px;
+  height: 18px;
+  padding: 2px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -655,7 +656,7 @@
 }
 
 .sound-on .sound-knob {
-  translate: 14px 0;
+  translate: 16px 0;
   background: var(--pulse);
 }
 
@@ -945,6 +946,15 @@
   border: none;
 }
 
+.drawer-io {
+  display: grid;
+  gap: 10px;
+}
+
+.drawer-io .widget-trigger {
+  justify-self: start;
+}
+
 .drawer-import {
   font: inherit;
   font-size: 12px;
@@ -955,6 +965,8 @@
   padding: 10px;
   resize: vertical;
   min-height: 70px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .drawer-import:focus-visible {
@@ -1055,7 +1067,8 @@
 .stage[data-zen] .main-quote,
 .stage[data-zen] .main-stats,
 .stage[data-zen] .col-side,
-.stage[data-zen] .surface-links {
+.stage[data-zen] .surface-links,
+.stage[data-zen] .settings-gear {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
@@ -1067,7 +1080,8 @@
 .main-quote,
 .main-stats,
 .col-side,
-.surface-links {
+.surface-links,
+.settings-gear {
   transition: opacity var(--dur) var(--ease-out), visibility 0s 0s;
 }
 
@@ -1123,7 +1137,8 @@
   .todo-text,
   .notes-box,
   .sound-knob,
-  .sound-bed {
+  .sound-bed,
+  .settings-gear {
     transition: none;
   }
 

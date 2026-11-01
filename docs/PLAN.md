@@ -174,12 +174,19 @@ week. mv3: alarms ≥ 0.5min (Chrome 120), ≤ 500 total.
   `chrome.storage` from a RAM map — every navigation resets the demo data,
   and counts like "1 today" only accumulate within one visit. Write-path
   persistence is what the tests prove; only the extension build persists.
-- **No visual pass on this phase yet.** The harness desktop window sat
-  occluded — Chrome freezes the animation clock in covered windows, so all
-  screenshot attempts failed and computed-style reads of animated
-  properties (e.g. `.arrive` stages) read their frozen delay state, not
-  design truth. The visual/design pass runs when a real window is visible,
-  before push confirmation.
+- **The visual pass ran where the windows allowed it.** The first pass kept
+  failing because the harness's desktop window sat occluded — Chrome freezes
+  the animation clock of covered windows, so screenshots were impossible and
+  every computed style of an animated element read its frozen delay state
+  (this is what made zen probes show `search` at `opacity: 0`; there was no
+  zen bug). With the window finally visible, the surface, drawer, palette
+  (list and empty state), and pure zen were verified as designed, and the
+  pass caught three blemishes, all fixed: the master-volume switch redrawn
+  as a rounded pill with real knob travel (the old 30px track left the knob
+  mathematically flush), the "Your data" block given a grid (full-width
+  import textarea, stacked quiet actions instead of scattered boxes), and
+  pure zen extended to hide the settings gear — a pure stage now holds only
+  greeting, clock, and search.
 
 ## Phase 2 honesty notes (v0.3-sound)
 
