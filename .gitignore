@@ -4,7 +4,13 @@ dist/
 .wxt/
 .taste-skill/
 .preview/
+coverage/
+*.tsbuildinfo
+*.log
+.env
+.env.*
 *.zip
 *.local
 .DS_Store
 Thumbs.db
+desktop.ini
