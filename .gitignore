@@ -14,3 +14,11 @@ coverage/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# editor and agent droppings — never the page's business
+.vscode/
+.idea/
+*.swp
+.opencode/
+.claude/
+.agents/
