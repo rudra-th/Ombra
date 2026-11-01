@@ -108,6 +108,25 @@ chromeStub.storage ??= {
 (globalThis as unknown as { chrome?: unknown }).chrome = chromeStub;
 
 /**
+ * A plausible attendance week for the design pass: the spark reads as a
+ * life, not a flatline. Today seeds 0 — the page's own boot gives it 1.
+ */
+function demoStats(today: string): Record<string, number> {
+  const week: Record<string, number> = {};
+  const back = (n: number): string => {
+    const d = new Date();
+    d.setDate(d.getDate() - n);
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${d.getFullYear()}-${m}-${day}`;
+  };
+  const shape = [2, 5, 1, 4, 0, 3, 0]; // oldest → today
+  for (let i = 0; i < shape.length; i += 1) week[back(6 - i)] = shape[i]!;
+  Object.assign(week, { [today]: 0 });
+  return week;
+}
+
+/**
  * Demo content for the design pass — never in a real extension runtime,
  * so the user's own data is never touched.
  */
@@ -134,6 +153,7 @@ if (!looksLikeExtension) {
       'Ideas for the week:\n— morning pages, before screens\n— the Ombra chapter on stillness',
     weather: { city: 'Pune', label: 'Maharashtra, India', latitude: 18.52, longitude: 73.86 },
     weatherCache: { temp: 26.4, code: 2, ts: Date.now() },
+    stats: demoStats(today),
   };
   data.sync = { settings: { version: 1, name: 'Rudra', soundEnabled: false } };
 }

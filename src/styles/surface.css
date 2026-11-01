@@ -187,6 +187,47 @@
   opacity: 0.75;
 }
 
+/* ————— Tab rhythm ————— */
+
+.main-stats {
+  margin-bottom: 30px;
+}
+
+.stats {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: var(--muted);
+}
+
+.stats-spark {
+  display: block;
+  flex: none;
+}
+
+.stats-spark polyline {
+  fill: none;
+  stroke: var(--ink-2);
+  stroke-width: 1;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  opacity: 0.55;
+}
+
+.stats-spark circle {
+  fill: var(--pulse);
+}
+
+.stats-line {
+  font-size: 12px;
+  letter-spacing: 0.06em;
+}
+
+.stats-line strong {
+  color: var(--ink-2);
+  font-weight: 500;
+}
+
 /* ————— Widgets (right column) ————— */
 
 .widget {

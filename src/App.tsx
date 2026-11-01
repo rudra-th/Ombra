@@ -10,6 +10,7 @@ import { Breath } from './widgets/breath/Breath';
 import { Focus } from './widgets/focus/Focus';
 import { Links } from './widgets/links/Links';
 import { Quote } from './widgets/quotes/Quote';
+import { Stats } from './widgets/stats/Stats';
 import { useSettings } from './state/settings';
 import { useDailyTick } from './state/useDailyTick';
 import { getSoundEngine } from './audio/bridge';
@@ -59,6 +60,9 @@ export default function App() {
           </div>
           <div className="arrive a3 main-quote">
             <Quote />
+          </div>
+          <div className="arrive a3b main-stats">
+            <Stats />
           </div>
         </div>
         <aside className="col-side">
