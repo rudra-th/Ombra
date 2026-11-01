@@ -136,11 +136,50 @@ week. mv3: alarms ≥ 0.5min (Chrome 120), ≤ 500 total.
    transport with idle weak-magnet snap, scene dots, frame-quantized dust,
    EMA adaptive quality, auto-exit on resolve. Deferrals → honesty notes
    below.
-4. **Depth** — stats strip, presets, settings drawer, export/import,
-   directories, command palette.
+4. **Depth** ✅ stats strip, presets, settings drawer, export/import,
+   command palette, pure-zen quick hide, deck touch sounds. Deferrals →
+   honesty notes below.
 5. **First Shadow** — driver.js guide, hints, replay.
 6. **Launch** — icon/logo, screenshots + story GIF, listing copy, privacy
    disclosures, v1.0.0, store submission.
+
+## Phase 4 honesty notes (v0.5-depth)
+
+- **"Directories" was resolved in Phase 1 clothing.** The token sat in this
+  phase's outline without ever growing a spec: the quick-links row with the
+  opt-in topSites picker (shipped Phase 1, ≤9/row) is this dashboard's
+  directory. A collections/folders page would fight the one-calm-row rule,
+  so it is dropped deliberately, not silently.
+- **Drag reorder is drag-only.** Links reorder with native HTML5 drag from
+  the label (anchors stay click-only; the dragged link takes its target's
+  exact slot). No keyboard reordering or move-menu exists yet — an honest
+  accessibility gap queued for later polish.
+- **Deck sounds wired; rest of the surface stays silent.** `hoverTick` and
+  `softClick` — spec'd, tested, and library-only since Phase 2 — now play on
+  the sound deck (hover tick on bed chips, soft click on the bed press and
+  master switch), through a seam that schedules only on a *running* context:
+  hover is never a gesture, so before the page's first real activation the
+  ticks never fire. The drawer's chips and inputs remain touch-silent; the
+  whole surface volubly sounding off is left to taste testing later.
+- **Pure zen hides, it does not clear.** Double-Esc is one toggle pair:
+  quote, stats spark, side column, and links fade to hidden while clock,
+  search, and grain keep the stage. A room-empty ("everything but the
+  clock") mode remains an un-sketched alternative.
+- **`.arrive` fill-mode change is load-bearing.** The arrival animation
+  moved from fill `both` to `backwards` so blocks hand ownership back to
+  the cascade at the end of their landing; with `both`, the animation
+  pinned `opacity` forever and silently out-ranked the zen fade's
+  transition. `prefers-reduced-motion` switches arrivals off already.
+- **Preview storage is memory.** The design-pass shim serves
+  `chrome.storage` from a RAM map — every navigation resets the demo data,
+  and counts like "1 today" only accumulate within one visit. Write-path
+  persistence is what the tests prove; only the extension build persists.
+- **No visual pass on this phase yet.** The harness desktop window sat
+  occluded — Chrome freezes the animation clock in covered windows, so all
+  screenshot attempts failed and computed-style reads of animated
+  properties (e.g. `.arrive` stages) read their frozen delay state, not
+  design truth. The visual/design pass runs when a real window is visible,
+  before push confirmation.
 
 ## Phase 2 honesty notes (v0.3-sound)
 
