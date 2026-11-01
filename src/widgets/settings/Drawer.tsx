@@ -7,8 +7,13 @@ import {
   setSoundPower,
   setSoundVolume,
   settingsItem,
+  updateSettings,
   useSettings,
 } from '../../state/settings';
+import { presetAmbience, presetSettings, type PresetId } from '../../state/presets';
+import { setBed, setLevel } from '../../audio/beds';
+import { ambienceItem } from '../sound/item';
+import { updateItem } from '../../state/useStorageValue';
 import { filmItem, setFilmMotion, useFilm } from '../../story/item';
 
 const ACCENTS = [
@@ -18,6 +23,12 @@ const ACCENTS = [
 ] as const;
 
 type AccentKey = (typeof ACCENTS)[number]['key'];
+
+const PRESET_ROWS = [
+  { id: 'morning', label: 'morning' },
+  { id: 'deep', label: 'deep work' },
+  { id: 'evening', label: 'evening' },
+] as const;
 
 const MOTIONS = [
   { key: 'cinema', label: 'cinema' },
@@ -67,6 +78,13 @@ export function SettingsDrawer() {
     } catch {
       setCopied(false);
     }
+  };
+
+  // a preset is two honest writes: the room's settings and its bed
+  const applyPreset = (id: PresetId) => {
+    void updateSettings(settingsItem, (prev) => ({ ...prev, ...presetSettings(id) }));
+    const { bed, level } = presetAmbience(id);
+    void updateItem(ambienceItem, (prev) => setLevel(setBed(prev, bed), bed, level));
   };
 
   const applyImport = async () => {
@@ -178,6 +196,22 @@ export function SettingsDrawer() {
                   onClick={() => void setFilmMotion(filmItem, m.key)}
                 >
                   {m.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="drawer-row" role="group" aria-label="Presets">
+            <span className="drawer-label">Presets</span>
+            <div className="drawer-chips">
+              {PRESET_ROWS.map((p) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  className="drawer-chip"
+                  onClick={() => applyPreset(p.id as PresetId)}
+                >
+                  {p.label}
                 </button>
               ))}
             </div>
