@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
 import { browser } from 'wxt/browser';
 import { linksItem } from './item';
-import { addLink, removeLink, type LinkItem } from './store';
+import { addLink, removeLink, reorderLinks, type LinkItem } from './store';
 import { useStorageValue, updateItem } from '../../state/useStorageValue';
 
 interface Top_site {
@@ -27,6 +27,8 @@ export function Links() {
   const [label, setLabel] = useState('');
   const [url, setUrl] = useState('');
   const [picker, setPicker] = useState<PickerState>({ kind: 'closed' });
+  const [dragUrl, setDragUrl] = useState<string | null>(null);
+  const [overUrl, setOverUrl] = useState<string | null>(null);
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
@@ -107,8 +109,40 @@ export function Links() {
     <nav className="links" aria-label="Quick links">
       <ul className="links-row">
         {links.map((l) => (
-          <li key={l.id} className="link-item">
-            <a href={l.url} target="_blank" rel="noreferrer">
+          <li
+            key={l.id}
+            className={`link-item${overUrl === l.url ? ' link-over' : ''}`}
+            draggable
+            onDragStart={(e) => {
+              setDragUrl(l.url);
+              e.dataTransfer.effectAllowed = 'move';
+              try {
+                e.dataTransfer.setData('text/plain', l.url);
+              } catch {
+                /* some embedders refuse setData — the local state carries it */
+              }
+            }}
+            onDragOver={(e) => {
+              if (dragUrl === null) return;
+              e.preventDefault();
+              e.dataTransfer.dropEffect = 'move';
+              setOverUrl(l.url);
+            }}
+            onDragLeave={() => setOverUrl((cur) => (cur === l.url ? null : cur))}
+            onDrop={(e) => {
+              e.preventDefault();
+              if (dragUrl && dragUrl !== l.url) {
+                void updateItem(linksItem, (prev) => reorderLinks(prev, dragUrl, l.url));
+              }
+              setDragUrl(null);
+              setOverUrl(null);
+            }}
+            onDragEnd={() => {
+              setDragUrl(null);
+              setOverUrl(null);
+            }}
+          >
+            <a href={l.url} target="_blank" rel="noreferrer" draggable={false}>
               {l.label}
             </a>
             <button

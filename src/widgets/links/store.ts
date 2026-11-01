@@ -29,3 +29,20 @@ export function addLink(
 export function removeLink(links: LinkItem[], url: string): LinkItem[] {
   return links.filter((l) => l.url !== url);
 }
+
+/** The dragged link takes the target's exact slot; anything else is a no-op. */
+export function reorderLinks(
+  links: LinkItem[],
+  fromUrl: string,
+  toUrl: string,
+): LinkItem[] {
+  if (fromUrl === toUrl) return links;
+  const from = links.findIndex((l) => l.url === fromUrl);
+  if (from === -1) return links;
+  const to = links.findIndex((l) => l.url === toUrl);
+  if (to === -1) return links;
+  const next = [...links];
+  const [moved] = next.splice(from, 1);
+  next.splice(to, 0, moved!);
+  return next;
+}
