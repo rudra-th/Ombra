@@ -1,7 +1,7 @@
 {
   "name": "ombra",
   "description": "A quieter new tab — zen dark mode, cinematic scroll stories, offline ambience.",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "engines": {

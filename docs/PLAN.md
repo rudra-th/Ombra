@@ -147,8 +147,15 @@ week. mv3: alarms ≥ 0.5min (Chrome 120), ≤ 500 total.
    stops (clock, search, quote, side tools, links row, the three summoned
    darks), Esc/arrow keys, film-and-palette pause-resume, palette replay,
    per-device remembering. Deferrals → honesty notes below.
-6. **Launch** — icon/logo, screenshots + story GIF, listing copy, privacy
-   disclosures, v1.0.0, store submission.
+6. **Launch** ✅ the orphan-ember emblem rendered in pure Node
+   (`scripts/make-icons.mjs`, deterministic, four sizes written to
+   `public/` and discovered into `manifest.icons`), five listing
+   screenshots, Chrome Web Store copy + single-purpose + permission
+   justifications (`docs/STORE.md`), the privacy statement
+   (`docs/PRIVACY.md`), version 1.0.0, the reviewed zip. Store
+   submission itself is manual (console action) — after this phase the
+   zip at `.output/ombra-1.0.0-chrome.zip` is the upload. Deferrals →
+   honesty notes below.
 
 ## Phase 4 honesty notes (v0.5-depth)
 
@@ -194,6 +201,32 @@ week. mv3: alarms ≥ 0.5min (Chrome 120), ≤ 500 total.
   import textarea, stacked quiet actions instead of scattered boxes), and
   pure zen extended to hide the settings gear — a pure stage now holds only
   greeting, clock, and search.
+
+## Phase 6 honesty notes (v1.0.0)
+
+- **The emblem is code, not pixels from a model.** The image generator's
+  quota ran dry, and the decision went the house way: `make-icons.mjs`
+  (~250 lines of pure Node — zlib PNG encoder, CRC table, 4× supersampled
+  coverage sampling) renders the eclipse deterministically. The motif: a
+  matte umbra disc eaten into a near-black grain tile, one thin ember
+  crescent of last light, five hand-placed dust speckles. Every output
+  is reproducible from the script; the small sizes get a proportionally
+  wider crescent so the light survives 16px instead of dying as a black
+  blob (the first render hid the sliver — caught by looking, fixed in
+  the geometry, re-verified by eye at every size).
+- **WXT wants `public/icon-<size>.png`**, flat, not an `icon/` folder —
+  discovery is a filename regex, learned from `manifest.mjs` in the
+  package itself after two failed placements.
+- **No story GIF in the listing, deliberately.** The five still shots
+  carry the store page; a cut of the film reel would be lovely but is
+  demo material, not launch material — deferred to the listing page,
+  where it can be attached without cutting a release.
+- **Submission is a manual step.** The zip is built and audited here;
+  the store console action cannot be — its checklist lives in
+  docs/STORE.md as paste-and-navigate fields.
+- **Version truth.** package.json (and thus the manifest) had said
+  0.1.0 through six shipped phases; it now says 1.0.0, and the tags from
+  v0.7 on tell the real history the manifest could not.
 
 ## Phase 5 honesty notes (v0.7-shadow)
 
