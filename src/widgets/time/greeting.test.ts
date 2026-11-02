@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatClock, greeting, greetingBand } from './greeting';
+import { formatClock, greeting, greetingBand, greetingParts } from './greeting';
 
 describe('greetingBand', () => {
   it('draws the four bands of the day', () => {
@@ -29,6 +29,22 @@ describe('greeting', () => {
 
   it('ignores a blank name as a stranger', () => {
     expect(greeting(9, '   ')).toBe('Good morning.');
+  });
+});
+
+describe('greetingParts — the unnamed greeting holds a blank', () => {
+  it('splits the phrase so the blank can be worn inline', () => {
+    expect(greetingParts(9)).toEqual({ before: 'Good morning, ', after: '.' });
+    expect(greetingParts(14)).toEqual({ before: 'Good afternoon, ', after: '.' });
+    expect(greetingParts(19)).toEqual({ before: 'Good evening, ', after: '.' });
+    expect(greetingParts(2)).toEqual({ before: 'Up late, ', after: '.' });
+  });
+
+  it('fitted together, the parts read as the named greeting', () => {
+    for (let hour = 0; hour < 24; hour++) {
+      const { before, after } = greetingParts(hour);
+      expect(`${before}Rudra${after}`).toBe(greeting(hour, 'Rudra'));
+    }
   });
 });
 

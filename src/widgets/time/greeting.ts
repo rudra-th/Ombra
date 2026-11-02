@@ -20,6 +20,15 @@ export function greeting(hour: number, name?: string): string {
   return trimmed ? `${base.slice(0, -1)}, ${trimmed}.` : base;
 }
 
+/**
+ * The unnamed state is the ask itself: the greeting keeps its comma and the
+ * name to be, so the surface offers a blank instead of holding silence.
+ */
+export function greetingParts(hour: number): { before: string; after: string } {
+  const base = LINES[greetingBand(hour)];
+  return { before: `${base.slice(0, -1)}, `, after: '.' };
+}
+
 export function formatClock(date: Date): string {
   return `${String(date.getHours()).padStart(2, '0')}:${String(
     date.getMinutes(),

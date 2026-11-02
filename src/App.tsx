@@ -12,7 +12,7 @@ import { Quote } from './widgets/quotes/Quote';
 import { Stats } from './widgets/stats/Stats';
 import { Drawer } from './widgets/settings/Drawer';
 import { Palette, type PaletteCommand } from './widgets/palette/Palette';
-import { useSettings, setSoundPower, setStatsVisible, setLinkIcons, settingsItem, setSettingsAccent } from './state/settings';
+import { useSettings, setSoundPower, setStatsVisible, setLinkIcons, settingsItem, setSettingsAccent, setSettingsName } from './state/settings';
 import { ensureIconsPermission, type PermissionsSeam } from './widgets/links/icons';
 import { browser } from 'wxt/browser';
 import { markGuided, tourItem, useTourSeen } from './widgets/guide/item';
@@ -181,7 +181,10 @@ export default function App() {
       <main className={`surface${zen ? ' surface--zen' : ''}`} inert={filmOpen}>
         <div className="col-main">
           <div className="arrive a0" data-tour="clock">
-            <Clock name={settings.name} />
+            <Clock
+              name={settings.name}
+              onName={(n) => void setSettingsName(settingsItem, n)}
+            />
           </div>
           <div className="arrive a1 main-search" data-tour="search">
             <Search />
