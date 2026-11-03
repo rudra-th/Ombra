@@ -86,8 +86,8 @@ Shot of the shipped surface (`docs/assets/`), in store order:
 5. `blank.png` — the unnamed greeting asking (the blank you fill)
 
 No story GIF shipped with v1.0.0 — the five stills carry the listing; a
-cut film GIF is a note in PLAN.md, not a launch blocker (see honesty
-notes).
+cut of the film reel is demo material for the listing page, where it
+can be attached without cutting a release.
 
 ## Privacy policy URL
 
