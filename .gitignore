@@ -11,6 +11,7 @@ coverage/
 .env.*
 *.zip
 *.local
+docs/PLAN.local.md
 .DS_Store
 Thumbs.db
 desktop.ini
