@@ -86,9 +86,8 @@ node scripts/make-icons.mjs   # re-render the emblem (pure node, no deps)
 
 ## The repo map
 
-- [`docs/STORE.md`](docs/STORE.md) — the Chrome Web Store listing, pre-composed
 - [`docs/PRIVACY.md`](docs/PRIVACY.md) — what leaves the device, plainly
-- `docs/assets/` — the five listing frames
+- `docs/assets/` — the listing frames
 
 ## License
 
