@@ -8,21 +8,15 @@ analytics, no cloud.
 
 ![The dashboard](docs/assets/main.png)
 
-The unnamed greeting leaves a blank to be filled — that is the whole ask:
+Everything sits still and earns its place; the unnamed greeting doesn't ask
+with a dialog — it simply leaves a blank in the sentence for you to fill.
 
-![The greeting asks](docs/assets/blank.png)
+| <kbd>Shift+S</kbd> — the film | <kbd>Ctrl+Shift+P</kbd> — the palette | the first shadow |
+|:---:|:---:|:---:|
+| ![The story film](docs/assets/film.png) | ![The palette](docs/assets/palette.png) | ![The first shadow](docs/assets/tour.png) |
 
-Press <kbd>Shift</kbd>+<kbd>S</kbd> and the tab becomes a story film:
-
-![The story film](docs/assets/film.png)
-
-<kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> opens a memory over everything:
-
-![The palette](docs/assets/palette.png)
-
-A first shadow walks the stage once, quietly, then never again:
-
-![The first shadow](docs/assets/tour.png)
+The summons, the memory, and the once-only tour — always a keypress away,
+never ambient.
 
 ## Install — from a release (easiest)
 
